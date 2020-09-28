@@ -19,16 +19,19 @@ public class UserController {
     @Autowired
     PasswordEncoder encoder;
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/")
     public List<User> getUsers(){
         return userService.findAll();
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/{id}")
     public User getUser(@PathVariable Long id){
         return userService.findById(id);
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/")
     public User postUser(@RequestBody User user){
         try {
