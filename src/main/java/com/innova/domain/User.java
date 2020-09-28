@@ -1,22 +1,35 @@
 package com.innova.domain;
 
 import javax.persistence.*;
+import javax.validation.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "users", schema = "public")
+@Table(name = "users", schema = "public",
+        uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"username"}),
+        @UniqueConstraint(columnNames = {"email"})})
 public class User {
 
+    @NotBlank
     @Id
+
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Size(min=3, max = 50)
     @Column(name = "username")
     private String username;
 
+    @NotBlank
     @Column(name = "email")
     private String email;
 
+    @NotBlank
+    @Size(min=6, max = 20)
     @Column(name = "password")
     private String password;
 
