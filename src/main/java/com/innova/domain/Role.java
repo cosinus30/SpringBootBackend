@@ -3,13 +3,13 @@ package com.innova.domain;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "roles", schema = "public")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 60)
+    @Column(name = "role",length = 60)
     private Roles role;
 
     public Role() {}

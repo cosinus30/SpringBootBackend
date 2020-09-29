@@ -2,8 +2,11 @@ package com.innova.domain;
 
 import javax.persistence.*;
 import javax.validation.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users", schema = "public",
@@ -14,8 +17,6 @@ public class User {
 
     @NotBlank
     @Id
-
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -24,14 +25,19 @@ public class User {
     @Column(name = "username")
     private String username;
 
-    @NotBlank
+    @Email
     @Column(name = "email")
+    @NotBlank
     private String email;
 
     @NotBlank
     @Size(min=6, max = 20)
     @Column(name = "password")
     private String password;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<Role>();
 
     public User(){
 
