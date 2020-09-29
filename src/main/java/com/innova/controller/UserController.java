@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @CrossOrigin(origins = "http://localhost:4200")
-    @PostMapping("/")
+    @PostMapping("/sign-up")
     public User postUser(@RequestBody User user){
         try {
             user.setPassword(encoder.encode(user.getPassword()));
