@@ -1,4 +1,4 @@
-package com.innova.security.jwt;
+package com.innova.message.response;
 
 public class JwtResponse {
     private String token;
