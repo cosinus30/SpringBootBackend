@@ -1,4 +1,4 @@
-package com.innova.domain;
+package com.innova.model;
 
 public enum Roles {
     ROLE_USER,

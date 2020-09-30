@@ -1,4 +1,4 @@
-package com.innova.domain;
+package com.innova.model;
 
 import javax.persistence.*;
 
@@ -9,6 +9,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role",length = 60)
     private Roles role;
 

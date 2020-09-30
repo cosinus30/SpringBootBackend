@@ -1,7 +1,6 @@
-package com.innova.domain;
+package com.innova.model;
 
 import javax.persistence.*;
-import javax.validation.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;

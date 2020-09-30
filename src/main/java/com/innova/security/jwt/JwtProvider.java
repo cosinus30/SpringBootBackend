@@ -1,6 +1,6 @@
 package com.innova.security.jwt;
 
-import com.innova.security.services.UserPrinciple;
+import com.innova.security.services.UserDetailImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class JwtProvider {
 
     public String generateJwtToken(Authentication authentication) {
 
-        UserPrinciple userPrincipal = (UserPrinciple) authentication.getPrincipal();
+        UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
 
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))

@@ -2,7 +2,7 @@ package com.innova.security.services;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.innova.domain.User;
+import com.innova.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class UserPrinciple implements UserDetails {
+public class UserDetailImpl implements UserDetails {
     private static final long serialVersionUID = 1L;
 
     private Long id;
@@ -27,9 +27,9 @@ public class UserPrinciple implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrinciple(Long id,
-                         String username, String email, String password,
-                         Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailImpl(Long id,
+                          String username, String email, String password,
+                          Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -37,12 +37,12 @@ public class UserPrinciple implements UserDetails {
         this.authorities = authorities;
     }
 
-    public static UserPrinciple build(User user) {
+    public static UserDetailImpl build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
                 new SimpleGrantedAuthority(role.getRole().name())
         ).collect(Collectors.toList());
 
-        return new UserPrinciple(
+        return new UserDetailImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -99,7 +99,7 @@ public class UserPrinciple implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UserPrinciple user = (UserPrinciple) o;
+        UserDetailImpl user = (UserDetailImpl) o;
         return Objects.equals(id, user.id);
     }
 }
