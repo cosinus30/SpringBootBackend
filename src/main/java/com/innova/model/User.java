@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users", schema = "public",
+@Table(name = "cloud_users", schema = "public",
         uniqueConstraints = {
         @UniqueConstraint(columnNames = {"username"}),
         @UniqueConstraint(columnNames = {"email"})})
@@ -17,7 +17,7 @@ public class User {
     @NotBlank
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @NotBlank
     @Size(min=3, max = 50)
@@ -42,7 +42,7 @@ public class User {
 
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -84,7 +84,7 @@ public class User {
         this.password = password;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
