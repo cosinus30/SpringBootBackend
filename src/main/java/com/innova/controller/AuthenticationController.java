@@ -1,11 +1,13 @@
 package com.innova.controller;
 
+import com.innova.model.Attempt;
 import com.innova.model.Role;
 import com.innova.model.Roles;
 import com.innova.model.User;
 import com.innova.message.request.LoginForm;
 import com.innova.message.request.SignUpForm;
 import com.innova.message.response.JwtResponse;
+import com.innova.repository.AttemptRepository;
 import com.innova.repository.RoleRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
@@ -18,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +40,9 @@ import java.util.stream.Collectors;
 public class AuthenticationController {
     @Autowired
     AuthenticationManager authenticationManager;
+
+    @Autowired
+    AttemptRepository attemptRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -50,20 +57,34 @@ public class AuthenticationController {
     JwtProvider jwtProvider;
 
     @PostMapping("signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword()));
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) {
 
-        System.out.println(authentication);
+            Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(()->
+                    new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
+            if((attempt.getAttemptCounter() >= 3 && loginForm.getCaptcha() == null)||(attempt.getAttemptCounter() >= 3 && !loginForm.getCaptcha().equals("captcha"))){
+                System.out.println(loginForm.getCaptcha());
+                return new ResponseEntity<String>("Captcha is needed!", HttpStatus.BAD_REQUEST);
+            }
+            else{
+                System.out.println("I'm in else");
+                Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String jwt = jwtProvider.generateJwtToken(authentication);
+                String jwt = jwtProvider.generateJwtToken(authentication);
 
-        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
+                UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
 
-        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
+                List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+                attempt.setAttemptCounter(0);
+
+                attemptRepository.save(attempt);
+
+                return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+            }
+
+
     }
 
     @PostMapping("sign-up")

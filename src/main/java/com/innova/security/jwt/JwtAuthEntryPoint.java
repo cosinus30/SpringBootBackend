@@ -37,7 +37,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 attempt.setAttemptCounter(attempt.getAttemptCounter()+1);
                 if(attempt.getAttemptCounter() >= 3){
                     attemptRepository.save(attempt);
-                    response.getOutputStream().print("{\"message\":\"Captcha: \" } ");
+                    response.getOutputStream().print("{\"message\":\"Captcha\" } ");
                     response.flushBuffer();
                     response.getOutputStream().close();
                 }
@@ -46,7 +46,6 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 }
                 attemptRepository.save(attempt);
             }catch (Exception ex){
-                System.out.println(request.getRemoteAddr());
                 Attempt attempt = new Attempt(request.getRemoteAddr(), 0);
                 attemptRepository.save(attempt);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");

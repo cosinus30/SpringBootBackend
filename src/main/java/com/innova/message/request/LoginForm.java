@@ -12,6 +12,16 @@ public class LoginForm {
     @Size(min=6, max = 20)
     private String password;
 
+    private String captcha;
+
+    public String getCaptcha() {
+        return captcha;
+    }
+
+    public void setCaptcha(String captcha) {
+        this.captcha = captcha;
+    }
+
     public String getUsername() {
         return username;
     }
