@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "attempt")
+@Table(name = "attempt", schema = "public")
 public class Attempt {
     @Id
     @Column(name = "ip")
@@ -36,5 +36,13 @@ public class Attempt {
 
     public void setAttemptCounter(int attemptCounter) {
         this.attemptCounter = attemptCounter;
+    }
+
+    @Override
+    public String toString() {
+        return "Attempt{" +
+                "ip='" + ip + '\'' +
+                ", attemptCounter=" + attemptCounter +
+                '}';
     }
 }

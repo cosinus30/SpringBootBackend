@@ -1,5 +1,6 @@
 package com.innova;
 
+import com.innova.security.captcha.CaptchaFilter;
 import com.innova.security.jwt.JwtAuthEntryPoint;
 import com.innova.security.jwt.JwtAuthTokenFilter;
 import com.innova.security.services.UserDetailsServiceImpl;
@@ -17,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 
 /*
  * Without writing this class
@@ -53,6 +55,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterBefore(new CaptchaFilter(),
+                SecurityContextPersistenceFilter.class);
     }
 
     @Bean
