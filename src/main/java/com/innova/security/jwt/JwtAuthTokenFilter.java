@@ -47,6 +47,10 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            else{
+                System.out.println(request.getRemoteAddr());
+            }
+
         } catch (Exception e) {
             logger.error("Can NOT set user authentication -> Message: {}", e);
         }
