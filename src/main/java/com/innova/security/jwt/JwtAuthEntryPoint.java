@@ -29,25 +29,30 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException e)
             throws IOException, ServletException {
-
         String jwt = getJwt(request);
         if(jwt == null){
             try{
                 Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(() ->
                         new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
-                attempt.setAttemptCounter(3);
-                if(attempt.getAttemptCounter() == 3){
-                    response.getWriter().write("{\"message\":\"Captcha: \" }");
+                attempt.setAttemptCounter(attempt.getAttemptCounter()+1);
+                if(attempt.getAttemptCounter() >= 3){
+                    attemptRepository.save(attempt);
+                    response.getOutputStream().print("{\"message\":\"Captcha: \" } ");
+                    response.flushBuffer();
+                    response.getOutputStream().close();
+                }
+                else{
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");
                 }
                 attemptRepository.save(attempt);
             }catch (Exception ex){
                 System.out.println(request.getRemoteAddr());
                 Attempt attempt = new Attempt(request.getRemoteAddr(), 0);
                 attemptRepository.save(attempt);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");
             }
         }
 
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");
     }
 
     private String getJwt(HttpServletRequest request) {
