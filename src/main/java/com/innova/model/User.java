@@ -16,7 +16,8 @@ public class User {
 
     @NotBlank
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq",initialValue = 10, allocationSize = 100)
     private Integer id;
 
     @NotBlank
