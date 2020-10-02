@@ -3,6 +3,7 @@ package com.innova.security.jwt;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -37,20 +38,21 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             try{
                 Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(() ->
                         new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
-                attempt.setAttemptCounter(attempt.getAttemptCounter()+1);
 
-//                LocalDateTime localDateTime = LocalDateTime.now();
-//
-//                attempt.setFirst_attempt_date(localDateTime);
-                if(attempt.getAttemptCounter() >= 3){
-                    attemptRepository.save(attempt);
+                long hour=ChronoUnit.HOURS.between(LocalDateTime.now(), attempt.getFirst_attempt_date());
+
+                if(hour>=24){
+                    attempt.setAttemptCounter(0);
+                    attempt.setFirst_attempt_date(LocalDateTime.now());
                 }
                 else{
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");
+                    attempt.setAttemptCounter(attempt.getAttemptCounter()+1);
                 }
+
                 attemptRepository.save(attempt);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");
             }catch (Exception ex){
-                Attempt attempt = new Attempt(request.getRemoteAddr(), 0);
+                Attempt attempt = new Attempt(request.getRemoteAddr(), 1, LocalDateTime.now());
                 attemptRepository.save(attempt);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");
             }
