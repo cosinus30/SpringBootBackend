@@ -1,6 +1,9 @@
 package com.innova.security.jwt;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,11 +38,12 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(() ->
                         new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
                 attempt.setAttemptCounter(attempt.getAttemptCounter()+1);
+
+//                LocalDateTime localDateTime = LocalDateTime.now();
+//
+//                attempt.setFirst_attempt_date(localDateTime);
                 if(attempt.getAttemptCounter() >= 3){
                     attemptRepository.save(attempt);
-                    response.getOutputStream().print("{\"message\":\"Captcha\" } ");
-                    response.flushBuffer();
-                    response.getOutputStream().close();
                 }
                 else{
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Captcha -> ");

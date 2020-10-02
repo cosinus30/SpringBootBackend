@@ -1,5 +1,6 @@
 package com.innova.controller;
 
+import com.innova.aspect.RequiresCaptcha;
 import com.innova.model.Attempt;
 import com.innova.model.Role;
 import com.innova.model.Roles;
@@ -7,7 +8,6 @@ import com.innova.model.User;
 import com.innova.message.request.LoginForm;
 import com.innova.message.request.SignUpForm;
 import com.innova.message.response.JwtResponse;
-import com.innova.repository.AttemptRepository;
 import com.innova.repository.RoleRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
@@ -42,9 +42,6 @@ public class AuthenticationController {
     AuthenticationManager authenticationManager;
 
     @Autowired
-    AttemptRepository attemptRepository;
-
-    @Autowired
     UserRepository userRepository;
 
     @Autowired
@@ -57,34 +54,20 @@ public class AuthenticationController {
     JwtProvider jwtProvider;
 
     @PostMapping("signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) {
+    @RequiresCaptcha
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm) {
 
-            Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(()->
-                    new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
-            if((attempt.getAttemptCounter() >= 3 && loginForm.getCaptcha() == null)||(attempt.getAttemptCounter() >= 3 && !loginForm.getCaptcha().equals("captcha"))){
-                System.out.println(loginForm.getCaptcha());
-                return new ResponseEntity<String>("Captcha is needed!", HttpStatus.BAD_REQUEST);
-            }
-            else{
-                System.out.println("I'm in else");
-                Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword()));
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginForm.getUsername(),
+                            loginForm.getPassword()
+                    )
+            );
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                String jwt = jwtProvider.generateJwtToken(authentication);
-
-                UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
-
-                List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
-
-                attempt.setAttemptCounter(0);
-
-                attemptRepository.save(attempt);
-
-                return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
-            }
-
-
+            String jwt = jwtProvider.generateJwtToken(authentication);
+            return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
     @PostMapping("sign-up")
