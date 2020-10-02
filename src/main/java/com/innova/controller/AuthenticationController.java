@@ -64,10 +64,18 @@ public class AuthenticationController {
                     )
             );
 
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String jwt = jwtProvider.generateJwtToken(authentication);
-            return ResponseEntity.ok(new JwtResponse(jwt));
+
+            UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
+
+            List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
+
+            return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
     }
 
     @PostMapping("sign-up")
