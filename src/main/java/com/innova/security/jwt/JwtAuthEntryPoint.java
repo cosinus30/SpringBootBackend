@@ -39,7 +39,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(() ->
                         new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
 
-                long hour=ChronoUnit.HOURS.between(LocalDateTime.now(), attempt.getFirst_attempt_date());
+                long hour=ChronoUnit.HOURS.between(attempt.getFirst_attempt_date(),LocalDateTime.now());
 
                 if(hour>=24){
                     attempt.setAttemptCounter(0);
