@@ -39,21 +39,17 @@ public class CaptchaAspect {
         Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(()->
                 new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
         if(attempt.getAttemptCounter() >= 3){
-
+            System.out.println("Hey there!");
             String captchaResponse = request.getHeader(CAPTCHA_HEADER_NAME);
             boolean isValidCaptcha = captchaValidator.validateCaptcha(captchaResponse);
             if(!isValidCaptcha){
                 response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED, "Captcha was expected");
+                return null;
             }
             else{
                 return joinPoint.proceed();
             }
         }
         return joinPoint.proceed();
-
-
     }
-
-
-
 }
