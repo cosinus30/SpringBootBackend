@@ -1,6 +1,7 @@
 package com.innova.controller;
 
 import com.innova.aspect.RequiresCaptcha;
+import com.innova.exception.ForbiddenException;
 import com.innova.model.Attempt;
 import com.innova.model.Role;
 import com.innova.model.Roles;
@@ -63,9 +64,6 @@ public class AuthenticationController {
                             loginForm.getPassword()
                     )
             );
-
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
