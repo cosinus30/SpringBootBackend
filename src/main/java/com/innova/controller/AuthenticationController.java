@@ -23,10 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,6 +51,7 @@ public class AuthenticationController {
     @Autowired
     JwtProvider jwtProvider;
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("signin")
     @RequiresCaptcha
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm) {
@@ -76,6 +74,7 @@ public class AuthenticationController {
             return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpForm) {
         if (userRepository.existsByUsername(signUpForm.getUsername())) {
