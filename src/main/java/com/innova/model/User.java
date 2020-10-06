@@ -17,13 +17,16 @@ public class User {
     @NotBlank
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq",initialValue = 10, allocationSize = 100)
+    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq",initialValue = 1, allocationSize = 100)
     private Integer id;
 
     @NotBlank
     @Size(min=3, max = 50)
     @Column(name = "username")
     private String username;
+
+    @Column(name="enabled")
+    private boolean enabled;
 
     @Email
     @Column(name = "email")
@@ -89,4 +92,23 @@ public class User {
         return id;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", enabled=" + enabled +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", roles=" + roles +
+                '}';
+    }
 }
