@@ -51,7 +51,6 @@ public class AuthenticationController {
     @Autowired
     JwtProvider jwtProvider;
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("signin")
     @RequiresCaptcha
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm) {
@@ -74,7 +73,6 @@ public class AuthenticationController {
             return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpForm) {
         if (userRepository.existsByUsername(signUpForm.getUsername())) {
