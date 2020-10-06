@@ -2,7 +2,8 @@ create table if not exists  "cloud_users" (
     id serial primary key ,
     username varchar(50) not null unique,
     email varchar(100) not null unique ,
-    password varchar(255) not null
+    password varchar(255) not null,
+    enabled boolean not null
 );
 
 create table if not exists "cloud_roles" (
