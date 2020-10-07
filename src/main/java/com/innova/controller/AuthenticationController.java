@@ -32,9 +32,12 @@ import org.springframework.web.bind.annotation.*;
 
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,7 +68,15 @@ public class AuthenticationController {
 
     @PostMapping("signin")
     @RequiresCaptcha
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletResponse response) throws IOException {
+
+            Optional<User> user= userRepository.findByUsername(loginForm.getUsername());
+
+            if(!user.get().isEnabled()){
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Account has not been activated.");
+            }
+
+
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
