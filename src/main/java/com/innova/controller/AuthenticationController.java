@@ -108,7 +108,7 @@ public class AuthenticationController {
         userRepository.save(user);
 
         try {
-            eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "appurl"));
+            eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
         }catch(Exception re) {
             re.printStackTrace();
 //			throw new Exception("Error while sending confirmation email");
@@ -127,6 +127,7 @@ public class AuthenticationController {
             String username = jwtProvider.getUserNameFromJwtToken(token, "verification");
             User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
             user.setEnabled(true);
+            userRepository.save(user);
             return "Thank you!";
         }
         else{
