@@ -1,5 +1,6 @@
 package com.innova.security.jwt;
 
+import com.innova.model.User;
 import com.innova.security.services.UserDetailImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -19,13 +20,24 @@ public class JwtProvider {
     @Value("${innova.app.jwtSecret}")
     private String jwtSecret;
 
+    @Value("${innova.app.jwtSecretForVerification}")
+    private String jtwSecretForVerification;
+
     @Value("${innova.app.jwtExpiration}")
     private int jwtExpiration;
 
+
+    public String generateJwtTokenForVerification(User user){
+        return Jwts.builder()
+                .setSubject((user.getUsername()))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpiration))
+                .signWith(SignatureAlgorithm.HS512, jtwSecretForVerification)
+                .compact();
+    }
     public String generateJwtToken(Authentication authentication) {
 
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
-
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
@@ -34,16 +46,20 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String getUserNameFromJwtToken(String token) {
+    public String getUserNameFromJwtToken(String token, String matter) {
+        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecret;
+
         return Jwts.parser()
-                .setSigningKey(jwtSecret)
+                .setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody().getSubject();
     }
 
-    public boolean validateJwtToken(String authToken) {
+    public boolean validateJwtToken(String authToken, String matter) {
+        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecret;
+
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+            Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException e) {
             logger.error("Invalid JWT signature -> Message: {} ", e);
@@ -56,7 +72,6 @@ public class JwtProvider {
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty -> Message: {}", e);
         }
-
         return false;
     }
 }

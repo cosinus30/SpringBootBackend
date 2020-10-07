@@ -14,6 +14,7 @@ import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 
 import com.innova.security.services.UserDetailImpl;
+import com.innova.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -50,6 +53,10 @@ public class AuthenticationController {
 
     @Autowired
     JwtProvider jwtProvider;
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
 
     @PostMapping("signin")
     @RequiresCaptcha
@@ -97,4 +104,24 @@ public class AuthenticationController {
 
         return ResponseEntity.ok().body("User registered successfully!");
     }
+
+    @GetMapping("/confirmRegistration")
+    public String confirmRegistration(@RequestParam("token") String token) {
+        if(token == null) {
+            return "token not given";
+        }
+
+        if (token!=null && jwtProvider.validateJwtToken(token, "verification")) {
+            String username = jwtProvider.getUserNameFromJwtToken(token, "verification");
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+            user.setEnabled(true);
+            return "Thank you!";
+        }
+        else{
+            return "Something is wrong!";
+        }
+
+
+    }
+
 }

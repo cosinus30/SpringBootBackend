@@ -1,13 +1,11 @@
 package com.innova.event;
 
-import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.model.User;
-import com.innova.service.IUserService;
+import com.innova.security.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 
@@ -20,7 +18,10 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
     private MailSender mailSender;
 
     @Autowired
-    private IUserService userService;
+    JwtProvider jwtProvider;
+
+//    @Autowired
+//    private IUserService userService;
 
     @Override
     public void onApplicationEvent(OnRegistrationSuccessEvent event) {
@@ -30,8 +31,10 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
 
     private void confirmRegistration(OnRegistrationSuccessEvent event) {
         User user = event.getUser();
-        String token = UUID.randomUUID().toString();
-        userService.createVerificationToken(user,token);
+//      String token = UUID.randomUUID().toString();
+//      userService.createVerificationToken(user,token);
+        String token = jwtProvider.generateJwtTokenForVerification(user);
+
 
         String recipient = user.getEmail();
         String subject = "Registration Confirmation";
