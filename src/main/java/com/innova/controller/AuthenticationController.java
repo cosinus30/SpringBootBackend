@@ -1,6 +1,7 @@
 package com.innova.controller;
 
 import com.innova.aspect.RequiresCaptcha;
+import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.ForbiddenException;
 import com.innova.model.Attempt;
 import com.innova.model.Role;
@@ -16,6 +17,7 @@ import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import com.innova.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -53,6 +55,9 @@ public class AuthenticationController {
 
     @Autowired
     JwtProvider jwtProvider;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
@@ -101,6 +106,13 @@ public class AuthenticationController {
         user.setRoles(roles);
 
         userRepository.save(user);
+
+        try {
+            eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "appurl"));
+        }catch(Exception re) {
+            re.printStackTrace();
+//			throw new Exception("Error while sending confirmation email");
+        }
 
         return ResponseEntity.ok().body("User registered successfully!");
     }
