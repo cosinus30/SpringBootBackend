@@ -6,6 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -18,8 +19,8 @@ import java.util.Properties;
 @ComponentScan(basePackages = "com.innova")
 public class EmailVerificationConfig {
 
-    @Bean(name = "mailSender")
-    public MailSender javaMailService() {
+    @Bean(name = "javaMailSender")
+    public JavaMailSender javaMailService() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         javaMailSender.setHost("smtp.gmail.com");
         javaMailSender.setPort(587);
@@ -40,6 +41,7 @@ public class EmailVerificationConfig {
         javaMailSender.setJavaMailProperties(mailProperties);
         return javaMailSender;
     }
+
     @Bean
     public MessageSource messageSource() {
         final ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
