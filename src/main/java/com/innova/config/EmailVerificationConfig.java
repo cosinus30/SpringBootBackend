@@ -1,5 +1,6 @@
 package com.innova.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -18,6 +19,12 @@ import java.util.Properties;
 @ComponentScan(basePackages = "com.innova")
 public class EmailVerificationConfig {
 
+    @Value("innovastajyer2020@gmail.com")
+    private String email;
+
+    @Value("1admin23")
+    private String password;
+
     @Bean(name = "mailSender")
     public MailSender javaMailService() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
@@ -27,10 +34,8 @@ public class EmailVerificationConfig {
         javaMailSender.setProtocol("smtp");
 
         //TODO create new account
-        javaMailSender.setUsername("sender’s email");
-        javaMailSender.setPassword("sender's password");
-
-
+        javaMailSender.setUsername(email);
+        javaMailSender.setPassword(password);
 
         Properties mailProperties = new Properties();
         mailProperties.put("mail.smtp.auth", "true");

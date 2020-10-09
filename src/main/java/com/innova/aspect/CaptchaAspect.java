@@ -1,5 +1,6 @@
 package com.innova.aspect;
 
+import com.innova.exception.CaptchaExpectedException;
 import com.innova.exception.ForbiddenException;
 import com.innova.model.Attempt;
 import com.innova.repository.AttemptRepository;
@@ -43,8 +44,12 @@ public class CaptchaAspect {
             String captchaResponse = request.getHeader(CAPTCHA_HEADER_NAME);
             boolean isValidCaptcha = captchaValidator.validateCaptcha(captchaResponse);
             if(!isValidCaptcha){
-                response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED, "Captcha was expected");
-                return null;
+                try {
+                    throw new Exception("Captcha was expected");
+                }
+                catch (Exception ex){
+                    throw new CaptchaExpectedException(ex.getMessage());
+                }
             }
             else{
                 return joinPoint.proceed();

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AttemptRepository extends JpaRepository<Attempt, String> {
+    Boolean existsByIp(String username);
 }

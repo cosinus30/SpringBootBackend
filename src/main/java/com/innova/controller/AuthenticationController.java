@@ -2,6 +2,8 @@ package com.innova.controller;
 
 import com.innova.aspect.RequiresCaptcha;
 import com.innova.event.OnRegistrationSuccessEvent;
+import com.innova.exception.AccountNotActivatedException;
+import com.innova.exception.ErrorWhileSendingEmailException;
 import com.innova.exception.ForbiddenException;
 import com.innova.model.Attempt;
 import com.innova.model.Role;
@@ -24,13 +26,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.bind.annotation.*;
 
 
+import javax.security.sasl.AuthenticationException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -68,15 +68,14 @@ public class AuthenticationController {
 
     @PostMapping("signin")
     @RequiresCaptcha
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletResponse response) throws IOException, AccountNotActivatedException {
 
             Optional<User> user= userRepository.findByUsername(loginForm.getUsername());
+            System.out.println(user.get().isEnabled());
 
             if(!user.get().isEnabled()){
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Account has not been activated.");
+                throw new AccountNotActivatedException("Account has not been activated.");
             }
-
-
 
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -121,8 +120,7 @@ public class AuthenticationController {
         try {
             eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
         }catch(Exception re) {
-            re.printStackTrace();
-//			throw new Exception("Error while sending confirmation email");
+			throw new ErrorWhileSendingEmailException(re.getMessage());
         }
 
         return ResponseEntity.ok().body("User registered successfully!");
