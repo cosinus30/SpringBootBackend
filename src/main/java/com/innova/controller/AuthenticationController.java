@@ -69,30 +69,26 @@ public class AuthenticationController {
     @PostMapping("signin")
     @RequiresCaptcha
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletResponse response) throws IOException, AccountNotActivatedException {
+        Optional<User> user= userRepository.findByUsername(loginForm.getUsername());
 
-            Optional<User> user= userRepository.findByUsername(loginForm.getUsername());
-            System.out.println(user.get().isEnabled());
+        System.out.println(loginForm.getUsername() + "    " + loginForm.getPassword());
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginForm.getUsername(),
+                        loginForm.getPassword()
+                )
+        );
 
-            if(!user.get().isEnabled()){
-                throw new AccountNotActivatedException("Account has not been activated.");
-            }
+        if(!user.get().isEnabled()){
+            throw new AccountNotActivatedException("Account has not been activated.");
+        }
 
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginForm.getUsername(),
-                            loginForm.getPassword()
-                    )
-            );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtProvider.generateJwtToken(authentication);
+        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            String jwt = jwtProvider.generateJwtToken(authentication);
-
-            UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
-
-            List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
-
-            return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
     }
 
     @PostMapping("sign-up")

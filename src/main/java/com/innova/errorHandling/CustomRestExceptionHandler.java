@@ -183,7 +183,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
         final String error = "Captcha was expected.";
 
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), error);
+        ApiError apiError = new ApiError(HttpStatus.EXPECTATION_FAILED, ex.getLocalizedMessage(), error);
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
 
@@ -195,7 +195,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
         final String error = "Error while sending email.";
 
-        ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), error);
+        ApiError apiError = new ApiError(HttpStatus.EXPECTATION_FAILED, ex.getLocalizedMessage(), error);
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
 

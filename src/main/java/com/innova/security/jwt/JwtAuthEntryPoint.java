@@ -36,27 +36,25 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             throws IOException, ServletException {
         String jwt = getJwt(request);
         if(jwt == null){
+            if(attemptRepository.existsByIp(request.getRemoteAddr())) {
+                Optional<Attempt> optionalAttempt = attemptRepository.findById(request.getRemoteAddr());
+                Attempt attempt=optionalAttempt.get();
+                long hour = ChronoUnit.HOURS.between(attempt.getFirst_attempt_date(), LocalDateTime.now());
 
-               if(attemptRepository.existsByIp(request.getRemoteAddr())) {
-                   Optional<Attempt> optionalAttempt = attemptRepository.findById(request.getRemoteAddr());
-                   Attempt attempt=optionalAttempt.get();
-                   long hour = ChronoUnit.HOURS.between(attempt.getFirst_attempt_date(), LocalDateTime.now());
+                if (hour >= 24) {
+                    attempt.setAttemptCounter(1);
+                    attempt.setFirst_attempt_date(LocalDateTime.now());
+                } else {
+                    attempt.setAttemptCounter(attempt.getAttemptCounter() + 1);
+                }
 
-                   if (hour >= 24) {
-                       attempt.setAttemptCounter(1);
-                       attempt.setFirst_attempt_date(LocalDateTime.now());
-                   } else {
-                       attempt.setAttemptCounter(attempt.getAttemptCounter() + 1);
-                   }
-
-                   attemptRepository.save(attempt);
-               } else {
-                   Attempt attempt = new Attempt(request.getRemoteAddr(), 1, LocalDateTime.now());
-                   attemptRepository.save(attempt);
-               }
+                attemptRepository.save(attempt);
+            } else {
+                Attempt attempt = new Attempt(request.getRemoteAddr(), 1, LocalDateTime.now());
+                attemptRepository.save(attempt);
+            }
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.getWriter().write("Username or password is incorrect.");
-
         }
 
     }
