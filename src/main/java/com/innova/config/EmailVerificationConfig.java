@@ -1,12 +1,12 @@
 package com.innova.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -19,14 +19,8 @@ import java.util.Properties;
 @ComponentScan(basePackages = "com.innova")
 public class EmailVerificationConfig {
 
-    @Value("innovastajyer2020@gmail.com")
-    private String email;
-
-    @Value("1admin23")
-    private String password;
-
-    @Bean(name = "mailSender")
-    public MailSender javaMailService() {
+    @Bean(name = "javaMailSender")
+    public JavaMailSender javaMailService() {
         JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
         javaMailSender.setHost("smtp.gmail.com");
         javaMailSender.setPort(587);
@@ -34,8 +28,10 @@ public class EmailVerificationConfig {
         javaMailSender.setProtocol("smtp");
 
         //TODO create new account
-        javaMailSender.setUsername(email);
-        javaMailSender.setPassword(password);
+        javaMailSender.setUsername("innovastajyer2020@gmail.com");
+        javaMailSender.setPassword("1admin23");
+
+
 
         Properties mailProperties = new Properties();
         mailProperties.put("mail.smtp.auth", "true");
@@ -45,6 +41,7 @@ public class EmailVerificationConfig {
         javaMailSender.setJavaMailProperties(mailProperties);
         return javaMailSender;
     }
+
     @Bean
     public MessageSource messageSource() {
         final ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
