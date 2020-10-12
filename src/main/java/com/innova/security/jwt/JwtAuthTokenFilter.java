@@ -1,12 +1,15 @@
 package com.innova.security.jwt;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.innova.model.Attempt;
+import com.innova.repository.AttemptRepository;
 import com.innova.security.services.UserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +32,22 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthTokenFilter.class);
 
+
+    @Autowired
+    AttemptRepository attemptRepository;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-        try {
 
+        if(!attemptRepository.existsByIp(request.getRemoteAddr())) {
+            Attempt attempt = new Attempt(request.getRemoteAddr(), 0, LocalDateTime.now());
+            attemptRepository.save(attempt);
+        }
+
+        try {
             String jwt = getJwt(request);
             if (jwt!=null && tokenProvider.validateJwtToken(jwt, "authorize")) {
                 String username = tokenProvider.getUserNameFromJwtToken(jwt, "authorize");
@@ -51,7 +63,6 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             logger.error("Can NOT set user authentication -> Message: {}", e);
         }
-
         filterChain.doFilter(request, response);
     }
 

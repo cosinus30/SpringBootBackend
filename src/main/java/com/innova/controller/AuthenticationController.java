@@ -12,6 +12,7 @@ import com.innova.model.User;
 import com.innova.message.request.LoginForm;
 import com.innova.message.request.SignUpForm;
 import com.innova.message.response.JwtResponse;
+import com.innova.repository.AttemptRepository;
 import com.innova.repository.RoleRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,9 @@ public class AuthenticationController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    AttemptRepository attemptRepository;
 
     @Autowired
     RoleRepository roleRepository;
@@ -68,16 +73,15 @@ public class AuthenticationController {
 
     @PostMapping("signin")
     @RequiresCaptcha
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletResponse response) throws IOException, AccountNotActivatedException {
-        Optional<User> user= userRepository.findByUsername(loginForm.getUsername());
-
-        System.out.println(loginForm.getUsername() + "    " + loginForm.getPassword());
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) throws IOException, AccountNotActivatedException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginForm.getUsername(),
                         loginForm.getPassword()
                 )
         );
+
+        Optional<User> user= userRepository.findByUsername(loginForm.getUsername());
 
         if(!user.get().isEnabled()){
             throw new AccountNotActivatedException("Account has not been activated.");
