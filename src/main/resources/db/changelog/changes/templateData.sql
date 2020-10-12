@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+insert into template (template_name, content)
+VALUES ('db-verification_email', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en" xmlns:th="https://thymeleaf.org">
 <head>
     <title>Sending Email with Thymeleaf HTML Template Example</title>
@@ -6,12 +7,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href=''http://fonts.googleapis.com/css?family=Roboto'' rel=''stylesheet'' type=''text/css''>
 
     <!-- use the font -->
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: ''Roboto'', sans-serif;
             font-size: 48px;
         }
     </style>
@@ -34,4 +35,4 @@
     </tr>
 </table>
 </body>
-</html>
+</html>');

@@ -19,12 +19,9 @@ public class ThymeleafConfig {
     }
 
     @Bean
-    public SpringResourceTemplateResolver htmlTemplateResolver(){
-        SpringResourceTemplateResolver emailTemplateResolver = new SpringResourceTemplateResolver();
-        emailTemplateResolver.setPrefix("classpath:/templates/email-templates/");
-        emailTemplateResolver.setSuffix(".html");
+    public DatabaseTemplateResolver htmlTemplateResolver(){
+        DatabaseTemplateResolver emailTemplateResolver = new DatabaseTemplateResolver();
         emailTemplateResolver.setTemplateMode(TemplateMode.HTML);
-        emailTemplateResolver.setCharacterEncoding(StandardCharsets.UTF_8.name());
         return emailTemplateResolver;
     }
 }

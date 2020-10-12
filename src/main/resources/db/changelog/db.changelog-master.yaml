@@ -5,3 +5,7 @@ databaseChangeLog:
       file: db/changelog/changes/v0003.sql
   - include:
       file: db/changelog/changes/data.sql
+  - include:
+      file: db/changelog/changes/template5.sql
+  - include:
+      file: db/changelog/changes/templateData.sql
