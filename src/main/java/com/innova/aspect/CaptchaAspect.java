@@ -1,7 +1,6 @@
 package com.innova.aspect;
 
 import com.innova.exception.CaptchaExpectedException;
-import com.innova.exception.ForbiddenException;
 import com.innova.model.Attempt;
 import com.innova.repository.AttemptRepository;
 import com.innova.service.CaptchaValidator;
@@ -9,14 +8,10 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 @Aspect
 @Component
@@ -34,8 +29,6 @@ public class CaptchaAspect {
     public Object validateCaptcha(ProceedingJoinPoint joinPoint) throws Throwable{
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
-
 
         if(attemptRepository.existsByIp(request.getRemoteAddr())){
             Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).get();
@@ -51,6 +44,8 @@ public class CaptchaAspect {
                     }
                 }
                 else{
+                    attempt.setAttemptCounter(0);
+                    attemptRepository.save(attempt);
                     return joinPoint.proceed();
                 }
             }
@@ -59,6 +54,5 @@ public class CaptchaAspect {
         else{
             return null;
         }
-
     }
 }
