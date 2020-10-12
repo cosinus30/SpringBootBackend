@@ -10,7 +10,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
@@ -53,7 +52,7 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
 
         Context context = new Context();
         context.setVariables(mail.getModel());
-        String html = templateEngine.process("verification-email", context);
+        String html = templateEngine.process("db-verification_email", context);
 
         helper.setTo(mail.getTo());
         helper.setText(html, true);
