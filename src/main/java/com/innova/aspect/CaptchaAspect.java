@@ -37,24 +37,28 @@ public class CaptchaAspect {
         HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getResponse();
 
 
-        Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).orElseThrow(()->
-                new UsernameNotFoundException("User Not Ip addr: " + request.getRemoteAddr()));
-        if(attempt.getAttemptCounter() >= 3){
-            System.out.println("Hey there!");
-            String captchaResponse = request.getHeader(CAPTCHA_HEADER_NAME);
-            boolean isValidCaptcha = captchaValidator.validateCaptcha(captchaResponse);
-            if(!isValidCaptcha){
-                try {
-                    throw new Exception("Captcha was expected");
+        if(attemptRepository.existsByIp(request.getRemoteAddr())){
+            Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).get();
+            if(attempt.getAttemptCounter() >= 3){
+                String captchaResponse = request.getHeader(CAPTCHA_HEADER_NAME);
+                boolean isValidCaptcha = captchaValidator.validateCaptcha(captchaResponse);
+                if(!isValidCaptcha){
+                    try {
+                        throw new Exception("Captcha was expected");
+                    }
+                    catch (Exception ex){
+                        throw new CaptchaExpectedException(ex.getMessage());
+                    }
                 }
-                catch (Exception ex){
-                    throw new CaptchaExpectedException(ex.getMessage());
+                else{
+                    return joinPoint.proceed();
                 }
             }
-            else{
-                return joinPoint.proceed();
-            }
+            return joinPoint.proceed();
         }
-        return joinPoint.proceed();
+        else{
+            return null;
+        }
+
     }
 }
