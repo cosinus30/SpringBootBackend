@@ -1,13 +1,10 @@
 package com.innova.event;
 
-import com.innova.dto.Mail;
 import com.innova.model.User;
 import com.innova.security.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.thymeleaf.context.Context;
@@ -20,7 +17,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Component
 public class RegistrationEmailListener implements ApplicationListener<OnRegistrationSuccessEvent> {
@@ -44,19 +40,15 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
 
     }
 
-    public void sendSimpleMessage(Mail mail) throws MessagingException, IOException {
+    public void sendSimpleMessage(String content, String to, String subject) throws MessagingException, IOException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message,
-                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                StandardCharsets.UTF_8.name());
+                                            MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                                            StandardCharsets.UTF_8.name());
 
-        Context context = new Context();
-        context.setVariables(mail.getModel());
-        String html = templateEngine.process("db-verification_email", context);
-
-        helper.setTo(mail.getTo());
-        helper.setText(html, true);
-        helper.setSubject(mail.getSubject());
+        helper.setTo(to);
+        helper.setText(content, true);
+        helper.setSubject(subject);
 
         javaMailSender.send(message);
     }
@@ -68,19 +60,15 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
         String recipient = user.getEmail();
         String url = "http://localhost:8080" + event.getAppUrl() + "/confirmRegistration?token=" + token;
 
-        //TODO Take these values from database
-        //TODO Find a solution for caching mail content
-
-        Mail mail = new Mail();
-        mail.setTo(recipient);
-        mail.setSubject("Registration Confirmation");
-
         Map model = new HashMap();
         model.put("name", user.getUsername());
         model.put("url", url);
         model.put("signature", "https://www.innova.com.tr/tr");
-        mail.setModel(model);
 
-        sendSimpleMessage(mail);
+        Context context = new Context();
+        context.setVariables(model);
+        String content = templateEngine.process("db-verification_email", context);
+
+        sendSimpleMessage(content ,recipient, "Registration Confirmation");
     }
 }
