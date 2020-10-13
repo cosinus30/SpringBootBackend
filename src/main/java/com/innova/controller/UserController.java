@@ -1,7 +1,6 @@
 package com.innova.controller;
 
 import com.innova.message.request.SignUpForm;
-import com.innova.message.response.JwtResponse;
 import com.innova.model.User;
 import com.innova.repository.UserRepository;
 import com.innova.security.services.UserDetailImpl;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Arrays;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/user")
@@ -58,7 +56,7 @@ public class UserController {
                 }
                 userRepository.save(user);
 
-                return ResponseEntity.ok(Arrays.asList( userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(),userDetails.getPassword(),passwordEncoder.encode(userDetails.getPassword())));
+                return ResponseEntity.ok(Arrays.asList("User details successfuly changed."));
             }
             else{
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("You are not changing anything."));
