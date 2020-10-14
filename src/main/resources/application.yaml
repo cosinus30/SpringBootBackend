@@ -14,7 +14,7 @@ spring:
   datasource:
     initialization-mode: always
     platform: postgres
-    url: postgresql://localhost:5432/project
+    url: jdbc:postgresql://localhost:5432/project
     username: postgres
     password: admin
   thymeleaf:
@@ -34,7 +34,7 @@ spring:
 innova:
   app:
     jwtSecret: jwtInnovaSecretKey
-    jwtSecretVerification: Iamhereforverification
+    jwtSecretForVerification: Iamhereforverification
     jwtExpiration: 86400000
   oauth2:
     authorizedRedirectUris:
