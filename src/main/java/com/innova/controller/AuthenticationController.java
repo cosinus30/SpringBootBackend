@@ -67,10 +67,6 @@ public class AuthenticationController {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
-
-
     @PostMapping("signin")
     @RequiresCaptcha
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) throws IOException, AccountNotActivatedException {
@@ -81,9 +77,9 @@ public class AuthenticationController {
                 )
         );
 
-        Optional<User> user= userRepository.findByUsername(loginForm.getUsername());
+        Optional<User> user = userRepository.findByUsername(loginForm.getUsername());
 
-        if(!user.get().isEnabled()){
+        if (!user.get().isEnabled()) {
             throw new AccountNotActivatedException("Account has not been activated.");
         }
 
@@ -119,8 +115,8 @@ public class AuthenticationController {
 
         try {
             eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
-        }catch(Exception re) {
-			throw new ErrorWhileSendingEmailException(re.getMessage());
+        } catch (Exception re) {
+            throw new ErrorWhileSendingEmailException(re.getMessage());
         }
 
         return ResponseEntity.ok().body("User registered successfully!");
@@ -128,18 +124,17 @@ public class AuthenticationController {
 
     @GetMapping("/confirmRegistration")
     public String confirmRegistration(@RequestParam("token") String token) {
-        if(token == null) {
+        if (token == null) {
             return "token not given";
         }
 
-        if (token!=null && jwtProvider.validateJwtToken(token, "verification")) {
+        if (token != null && jwtProvider.validateJwtToken(token, "verification")) {
             String username = jwtProvider.getUserNameFromJwtToken(token, "verification");
             User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
             user.setEnabled(true);
             userRepository.save(user);
             return "Thank you!";
-        }
-        else{
+        } else {
             return "Something is wrong!";
         }
 

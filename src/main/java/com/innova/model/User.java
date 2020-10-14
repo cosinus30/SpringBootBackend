@@ -10,22 +10,22 @@ import java.util.Set;
 @Entity
 @Table(name = "cloud_users", schema = "public",
         uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"username"}),
-        @UniqueConstraint(columnNames = {"email"})})
+                @UniqueConstraint(columnNames = {"username"}),
+                @UniqueConstraint(columnNames = {"email"})})
 public class User {
 
     @NotBlank
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq",initialValue = 1, allocationSize = 100)
+    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", initialValue = 1, allocationSize = 100)
     private Integer id;
 
     @NotBlank
-    @Size(min=3, max = 50)
+    @Size(min = 3, max = 50)
     @Column(name = "username")
     private String username;
 
-    @Column(name="enabled")
+    @Column(name = "enabled")
     private boolean enabled;
 
     @Email
@@ -34,15 +34,21 @@ public class User {
     private String email;
 
     @NotBlank
-    @Size(min=6, max = 20)
+    @Size(min = 6, max = 20)
     @Column(name = "password")
     private String password;
+
+    private String name;
+
+    private String lastname;
+
+    private String age;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<Role>();
 
-    public User(){
+    public User() {
 
     }
 
@@ -57,7 +63,8 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
-    public User(String username, String email, String password){
+
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
@@ -100,6 +107,30 @@ public class User {
         this.enabled = enabled;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -108,6 +139,9 @@ public class User {
                 ", enabled=" + enabled +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", name='" + name + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", age='" + age + '\'' +
                 ", roles=" + roles +
                 '}';
     }
