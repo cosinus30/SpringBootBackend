@@ -2,7 +2,7 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/attempt.sql
   - include:
-      file: db/changelog/changes/v0003.sql
+      file: db/changelog/changes/v0004.sql
   - include:
       file: db/changelog/changes/data.sql
   - include:

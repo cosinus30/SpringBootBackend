@@ -38,11 +38,17 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Size(min = 3, max = 25)
     private String name;
 
+    @Size(min = 3, max = 25)
     private String lastname;
 
+    @Size(min = 1, max = 3)
     private String age;
+
+    @Size(min = 10, max = 10)
+    private String phoneNumber;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -107,6 +113,14 @@ public class User {
         this.enabled = enabled;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
     public String getName() {
         return name;
     }
@@ -142,6 +156,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", lastname='" + lastname + '\'' +
                 ", age='" + age + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", roles=" + roles +
                 '}';
     }
