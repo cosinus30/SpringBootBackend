@@ -6,13 +6,15 @@ import com.innova.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class UserDetailImpl implements UserDetails {
+public class UserDetailImpl implements UserDetails, OAuth2User {
     private static final long serialVersionUID = 1L;
 
     private Integer id;
@@ -33,6 +35,9 @@ public class UserDetailImpl implements UserDetails {
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
+
+    private Map<String, Object> attributes;
+
 
     public UserDetailImpl(Integer id,
                           String username, String email, String name, String lastname, String phoneNumber, String age, String password,
@@ -64,6 +69,20 @@ public class UserDetailImpl implements UserDetails {
                 user.getPassword(),
                 authorities
         );
+    }
+
+    public static UserDetailImpl build(User user, Map<String, Object> attributes) {
+        UserDetailImpl userPrincipal = UserDetailImpl.build(user);
+        userPrincipal.setAttributes(attributes);
+        return userPrincipal;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 
     public Integer getId() {
@@ -132,5 +151,10 @@ public class UserDetailImpl implements UserDetails {
 
         UserDetailImpl user = (UserDetailImpl) o;
         return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public String getName() {
+        return String.valueOf(id);
     }
 }
