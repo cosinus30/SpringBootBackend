@@ -2,20 +2,22 @@ package com.innova.message.response;
 
 import java.util.List;
 
-public class JwtResponse {
-    private String token;
+public class LoginResponse {
+    private String accessToken;
+    private String refreshToken;
     private String type = "Bearer";
     private String email;
     private String username;
     private List<String> roles;
     private Integer id;
 
-    public JwtResponse(String accessToken) {
-        this.token = accessToken;
+    public LoginResponse(String accessToken) {
+        this.accessToken = accessToken;
     }
 
-    public JwtResponse(String jwt, Integer id, String username, String email, List<String> roles) {
-        this.token = jwt;
+    public LoginResponse(String accessToken,String refreshToken, Integer id, String username, String email, List<String> roles) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
         this.id = id;
         this.username = username;
         this.email = email;
@@ -55,11 +57,11 @@ public class JwtResponse {
     }
 
     public String getAccessToken() {
-        return token;
+        return accessToken;
     }
 
     public void setAccessToken(String accessToken) {
-        this.token = accessToken;
+        this.accessToken = accessToken;
     }
 
     public String getTokenType() {

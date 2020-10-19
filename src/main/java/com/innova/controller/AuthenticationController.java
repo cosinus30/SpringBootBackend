@@ -4,21 +4,18 @@ import com.innova.aspect.RequiresCaptcha;
 import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.AccountNotActivatedException;
 import com.innova.exception.ErrorWhileSendingEmailException;
-import com.innova.exception.ForbiddenException;
-import com.innova.model.Attempt;
 import com.innova.model.Role;
 import com.innova.model.Roles;
 import com.innova.model.User;
 import com.innova.message.request.LoginForm;
 import com.innova.message.request.SignUpForm;
-import com.innova.message.response.JwtResponse;
+import com.innova.message.response.LoginResponse;
 import com.innova.repository.AttemptRepository;
 import com.innova.repository.RoleRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 
 import com.innova.security.services.UserDetailImpl;
-import com.innova.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -31,16 +28,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 
-import javax.security.sasl.AuthenticationException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -70,6 +61,10 @@ public class AuthenticationController {
     @PostMapping("signin")
     @RequiresCaptcha
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) throws IOException, AccountNotActivatedException {
+        if(loginForm.getPassword() == null || loginForm.getUsername() == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("Username and password should be provided"));
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginForm.getUsername(),
@@ -84,11 +79,14 @@ public class AuthenticationController {
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtProvider.generateJwtToken(authentication);
+
+        String accessToken = jwtProvider.generateJwtToken(authentication);
+        String refreshToken = jwtProvider.generateRefreshToken(authentication);
+
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+        return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
     }
 
     @PostMapping("sign-up")
@@ -137,8 +135,6 @@ public class AuthenticationController {
         } else {
             return "Something is wrong!";
         }
-
-
     }
 
 }
