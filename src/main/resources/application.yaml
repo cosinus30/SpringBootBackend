@@ -38,4 +38,5 @@ innova:
     jwtExpiration: 86400000
   oauth2:
     authorizedRedirectUris:
-      - http://localhost:4200/oauth2/redirect
+      - http://localhost:4200/auth
+#Redirect adresini degistirmemiz gerek!
