@@ -17,37 +17,45 @@ public class JwtProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
-    @Value("${innova.app.jwtSecret}")
-    private String jwtSecret;
+
+    @Value("${innova.app.jwtSecretForAccessToken}")
+    private String jwtSecretForAccessToken;
+    @Value("${innova.app.jwtAccessTokenExpiration}")
+    private int jwtAccessTokenExpiration;
+
+    @Value("${innova.app.jwtSecretForRefreshToken}")
+    private String jwtSecretForRefreshToken;
+    @Value("${innova.app.jwtRefreshTokenExpiration}")
+    private int jwtRefreshTokenExpiration;
 
     @Value("${innova.app.jwtSecretForVerification}")
     private String jtwSecretForVerification;
-
-    @Value("${innova.app.jwtExpiration}")
-    private int jwtExpiration;
+    @Value("${innova.app.jwtVerificationTokenExpiration}")
+    private int jwtVerificationTokenExpiration;
 
 
     public String generateJwtTokenForVerification(User user){
         return Jwts.builder()
                 .setSubject((user.getUsername()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpiration))
+                .setExpiration(new Date((new Date()).getTime() + jwtVerificationTokenExpiration))
                 .signWith(SignatureAlgorithm.HS512, jtwSecretForVerification)
                 .compact();
     }
+
     public String generateJwtToken(Authentication authentication) {
 
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpiration))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .setExpiration(new Date((new Date()).getTime() + jwtAccessTokenExpiration))
+                .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
                 .compact();
     }
 
     public String getUserNameFromJwtToken(String token, String matter) {
-        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecret;
+        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecretForAccessToken;
 
         return Jwts.parser()
                 .setSigningKey(secret)
@@ -56,7 +64,7 @@ public class JwtProvider {
     }
 
     public boolean validateJwtToken(String authToken, String matter) {
-        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecret;
+        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecretForAccessToken;
 
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);

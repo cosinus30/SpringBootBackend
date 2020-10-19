@@ -33,9 +33,12 @@ spring:
 
 innova:
   app:
-    jwtSecret: jwtInnovaSecretKey
+    jwtSecretForAccessToken: jwtInnovaSecretKey
     jwtSecretForVerification: Iamhereforverification
-    jwtExpiration: 86400000
+    jwtSecretForRefreshToken: Youshallnotpass
+    jwtAccessTokenExpiration: 1800000
+    jwtRefreshTokenExpiration: 2592000000
+    jwtVerificationTokenExpiration: 21600000
   oauth2:
     authorizedRedirectUris:
       - http://localhost:4200/auth
