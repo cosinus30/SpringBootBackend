@@ -36,6 +36,14 @@ public class LoginResponse {
         return username;
     }
 
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
