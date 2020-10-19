@@ -1,10 +1,12 @@
 package com.innova.security.jwt;
 
 import com.innova.model.User;
+import com.innova.repository.TokenBlacklistRepository;
 import com.innova.security.services.UserDetailImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,8 @@ public class JwtProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
 
+    @Autowired
+    TokenBlacklistRepository tokenBlacklistRepository;
 
     @Value("${innova.app.jwtSecretForAccessToken}")
     private String jwtSecretForAccessToken;
@@ -73,7 +77,7 @@ public class JwtProvider {
     }
 
     public String getUserNameFromJwtToken(String token, String matter) {
-        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecretForAccessToken;
+        String secret = getSecret(matter);
 
         return Jwts.parser()
                 .setSigningKey(secret)
@@ -82,9 +86,11 @@ public class JwtProvider {
     }
 
     public boolean validateJwtToken(String authToken, String matter) {
-        String secret = matter.equals("verification") ? jtwSecretForVerification : jwtSecretForAccessToken;
-
+        String secret = getSecret(matter);
         try {
+            if(matter.equals("refresh") && checkExistence(authToken)){
+                return false;
+            }
             Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException e) {
@@ -99,5 +105,22 @@ public class JwtProvider {
             logger.error("JWT claims string is empty -> Message: {}", e);
         }
         return false;
+    }
+
+    private boolean checkExistence(String token){
+        return tokenBlacklistRepository.existsByToken(token);
+    }
+
+    private String getSecret(String matter){
+        switch (matter){
+            case "verification":
+                return jtwSecretForVerification;
+            case "authorize":
+                return jwtSecretForAccessToken;
+            case "refresh":
+                return jwtSecretForRefreshToken;
+            default:
+                return null;
+        }
     }
 }
