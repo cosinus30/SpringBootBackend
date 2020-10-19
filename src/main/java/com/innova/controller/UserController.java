@@ -1,8 +1,11 @@
 package com.innova.controller;
 
 
+import com.innova.message.request.LogoutForm;
 import com.innova.message.request.changeForm;
+import com.innova.model.TokenBlacklist;
 import com.innova.model.User;
+import com.innova.repository.TokenBlacklistRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.services.UserDetailImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,9 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    TokenBlacklistRepository tokenBlacklistRepository;
 
     @GetMapping("/")
     public ResponseEntity<?> getUser() {
@@ -70,5 +76,20 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Arrays.asList("Please sign in for retrieving user information."));
         }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(@RequestBody LogoutForm logoutForm){
+            if(logoutForm.getAccessToken() == null || logoutForm.getRefreshToken() == null){
+                return ResponseEntity.badRequest().body("Both tokens should be provided");
+            }
+            else{
+                TokenBlacklist oldAccessToken = new TokenBlacklist(logoutForm.getAccessToken(), "access token");
+                TokenBlacklist oldRefreshToken = new TokenBlacklist(logoutForm.getRefreshToken(), "refresh token");
+                tokenBlacklistRepository.save(oldAccessToken);
+                tokenBlacklistRepository.save(oldRefreshToken);
+                return ResponseEntity.ok().body("Successfully logged out");
+            }
+
     }
 }
