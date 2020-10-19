@@ -43,6 +43,16 @@ public class JwtProvider {
                 .compact();
     }
 
+    public String generateRefreshToken(Authentication authentication) {
+        UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
+        return Jwts.builder()
+                .setSubject((userPrincipal.getUsername()))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtRefreshTokenExpiration))
+                .signWith(SignatureAlgorithm.HS512, jwtSecretForRefreshToken)
+                .compact();
+    }
+
     public String generateJwtToken(Authentication authentication) {
 
         StringBuilder payload = new StringBuilder();

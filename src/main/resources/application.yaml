@@ -42,4 +42,3 @@ innova:
   oauth2:
     authorizedRedirectUris:
       - http://localhost:4200/auth
-#Redirect adresini degistirmemiz gerek!
