@@ -25,24 +25,26 @@ public class JwtProvider {
     @Value("${innova.app.jwtSecretForAccessToken}")
     private String jwtSecretForAccessToken;
     @Value("${innova.app.jwtAccessTokenExpiration}")
-    private int jwtAccessTokenExpiration;
+    private String jwtAccessTokenExpiration;
 
     @Value("${innova.app.jwtSecretForRefreshToken}")
     private String jwtSecretForRefreshToken;
     @Value("${innova.app.jwtRefreshTokenExpiration}")
-    private int jwtRefreshTokenExpiration;
+    private String jwtRefreshTokenExpiration;
 
     @Value("${innova.app.jwtSecretForVerification}")
     private String jtwSecretForVerification;
     @Value("${innova.app.jwtVerificationTokenExpiration}")
-    private int jwtVerificationTokenExpiration;
+    private String jwtVerificationTokenExpiration;
 
+
+    public JwtProvider(){}
 
     public String generateJwtTokenForVerification(User user){
         return Jwts.builder()
                 .setSubject((user.getUsername()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtVerificationTokenExpiration))
+                .setExpiration(new Date((new Date()).getTime() + Integer.parseInt(jwtVerificationTokenExpiration)))
                 .signWith(SignatureAlgorithm.HS512, jtwSecretForVerification)
                 .compact();
     }
@@ -52,7 +54,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtRefreshTokenExpiration))
+                .setExpiration(new Date((new Date()).getTime() + Integer.parseInt(jwtRefreshTokenExpiration)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForRefreshToken)
                 .compact();
     }
@@ -69,7 +71,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtAccessTokenExpiration))
+                .setExpiration(new Date((new Date()).getTime() + Integer.parseInt(jwtAccessTokenExpiration)))
                 .setId(userPrincipal.getId().toString())
                 .setPayload(String.valueOf(payload))
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
