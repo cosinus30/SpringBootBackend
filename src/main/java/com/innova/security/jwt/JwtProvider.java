@@ -88,7 +88,7 @@ public class JwtProvider {
     public boolean validateJwtToken(String authToken, String matter) {
         String secret = getSecret(matter);
         try {
-            if(matter.equals("refresh") && checkExistence(authToken)){
+            if(!matter.equals("verification") && checkExistence(authToken)){
                 return false;
             }
             Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);
