@@ -45,11 +45,19 @@ public class JwtProvider {
 
     public String generateJwtToken(Authentication authentication) {
 
+        StringBuilder payload = new StringBuilder();
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
+
+        payload.append(userPrincipal.getId());
+        payload.append(userPrincipal.getAuthorities());
+        payload.append(userPrincipal.getName());
+
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtAccessTokenExpiration))
+                .setId(userPrincipal.getId().toString())
+                .setPayload(String.valueOf(payload))
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
                 .compact();
     }
