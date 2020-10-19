@@ -3,6 +3,7 @@ package com.innova.model;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +21,6 @@ public class User {
     @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", initialValue = 1, allocationSize = 100)
     private Integer id;
 
-    @NotBlank
     @Size(min = 3, max = 50)
     @Column(name = "username")
     private String username;
@@ -33,7 +33,6 @@ public class User {
     @NotBlank
     private String email;
 
-    @NotBlank
     @Size(min = 6, max = 20)
     @Column(name = "password")
     private String password;
@@ -44,7 +43,12 @@ public class User {
 
     private String age;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+//    @NotNull
+//    private String provider;
+//
+//    private String providerId;
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<Role>();
 
