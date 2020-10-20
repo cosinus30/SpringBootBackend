@@ -50,7 +50,7 @@ public class UserController {
             UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
 
             User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
-            if (changeForm.getEmail() != null || changeForm.getPassword() != null || changeForm.getAge() != null || changeForm.getName() != null || changeForm.getLastname() != null) {
+            if (changeForm.getEmail() != null || changeForm.getPassword() != null || changeForm.getAge() != null || changeForm.getName() != null || changeForm.getLastname() != null || changeForm.getPhoneNumber() != null) {
                 if (changeForm.getEmail() != null) {
                     if (userRepository.existsByEmail(changeForm.getEmail())) {
                         return new ResponseEntity<String>("Email is already in use!", HttpStatus.BAD_REQUEST);
@@ -66,6 +66,8 @@ public class UserController {
                     user.setLastname(changeForm.getLastname());
                 if (changeForm.getAge() != null)
                     user.setAge(changeForm.getAge());
+                if (changeForm.getPhoneNumber() != null)
+                    user.setPhoneNumber(changeForm.getPhoneNumber());
 
                 userRepository.save(user);
 
