@@ -1,5 +1,6 @@
 package com.innova.security.jwt;
 
+import com.innova.exception.AccessTokenExpiredException;
 import com.innova.model.User;
 import com.innova.repository.TokenBlacklistRepository;
 import com.innova.security.services.UserDetailImpl;
@@ -114,7 +115,7 @@ public class JwtProvider {
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token -> Message: {}", e);
         } catch (ExpiredJwtException e) {
-            logger.error("Expired JWT token -> Message: {}", e);
+            throw new AccessTokenExpiredException("Expired JWT token.");
         } catch (UnsupportedJwtException e) {
             logger.error("Unsupported JWT token -> Message: {}", e);
         } catch (IllegalArgumentException e) {
