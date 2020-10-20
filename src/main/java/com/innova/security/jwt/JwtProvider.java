@@ -46,7 +46,7 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject((user.getUsername()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + Integer.parseInt(jwtVerificationTokenExpiration)))
+                .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtVerificationTokenExpiration)))
                 .signWith(SignatureAlgorithm.HS512, jtwSecretForVerification)
                 .compact();
     }
@@ -65,18 +65,21 @@ public class JwtProvider {
         Map<String, Object> claims = new HashMap<>();
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
         System.out.println(userPrincipal.getUsername());
-//        TODO correct user detail impl
-//        claims.put("id", userPrincipal.getId());
+
+        claims.put("id", userPrincipal.getId());
         claims.put("authorities", userPrincipal.getAuthorities());
         claims.put("name", userPrincipal.getName());
         claims.put("username", userPrincipal.getUsername());
         claims.put("email", userPrincipal.getEmail());
+        claims.put("exp", new Date((new Date()).getTime() + Long.parseLong(jwtAccessTokenExpiration)));
+        claims.put("iat", new Date());
+        claims.put("subject", (userPrincipal.getUsername()));
+
+        System.out.println(new Date());
+        System.out.println(new Date((new Date()).getTime() + Long.parseLong(jwtAccessTokenExpiration)));
+
 
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + Integer.parseInt(jwtAccessTokenExpiration)))
-                .setId(userPrincipal.getId().toString())
                 .setClaims(claims)
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
                 .compact();
