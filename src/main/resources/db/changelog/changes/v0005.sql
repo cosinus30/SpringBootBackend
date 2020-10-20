@@ -1,0 +1,2 @@
+ALTER TABLE cloud_users ALTER COLUMN password DROP NOT NULL;
+ALTER TABLE cloud_users ALTER COLUMN username DROP NOT NULL;

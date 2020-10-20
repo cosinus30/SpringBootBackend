@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changes/template5.sql
   - include:
       file: db/changelog/changes/templateData.sql
+  - include:
+      file: db/changelog/changes/v0005.sql
