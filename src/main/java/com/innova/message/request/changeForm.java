@@ -21,11 +21,25 @@ public class changeForm {
     @Size(min = 6, max = 20)
     private String password;
 
+    @Size(min = 3, max = 25)
     private String name;
 
+    @Size(min = 3, max = 25)
     private String lastname;
 
+    @Size(min = 1, max = 3)
     private String age;
+
+    @Size(min = 10, max = 10)
+    private String phoneNumber;
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
     public String getName() {
         return name;
@@ -49,14 +63,6 @@ public class changeForm {
 
     public void setAge(String age) {
         this.age = age;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getEmail() {
