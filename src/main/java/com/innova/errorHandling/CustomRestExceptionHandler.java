@@ -1,5 +1,6 @@
 package com.innova.errorHandling;
 
+import com.innova.exception.AccessTokenExpiredException;
 import com.innova.exception.AccountNotActivatedException;
 import com.innova.exception.CaptchaExpectedException;
 import com.innova.exception.ErrorWhileSendingEmailException;
@@ -128,6 +129,16 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         logger.info(ex.getClass().getName());
 
         final String error = "Hey, you! Stop right there. Activation required.";
+
+        ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, ex.getLocalizedMessage(), error);
+        return new ResponseEntity<>(apiError, apiError.getStatus());
+    }
+
+    @ExceptionHandler({AccessTokenExpiredException.class})
+    public ResponseEntity<Object> handleAccessTokenExpiredException(final AccessTokenExpiredException ex) {
+        logger.info(ex.getClass().getName());
+
+        final String error = "Expired JWT Token";
 
         ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, ex.getLocalizedMessage(), error);
         return new ResponseEntity<>(apiError, apiError.getStatus());
