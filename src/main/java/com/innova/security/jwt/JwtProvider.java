@@ -88,10 +88,10 @@ public class JwtProvider {
 
     public String getUserNameFromJwtToken(String token, String matter) {
         String secret = getSecret(matter);
-        return  (String) Jwts.parser()
+        return  Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)
-                .getBody().get("username");
+                .getBody().getSubject();
     }
 
     public String getEmailFromJwtToken(String token, String matter) {
