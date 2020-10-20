@@ -23,6 +23,11 @@ public class UserDetailImpl implements UserDetails, OAuth2User {
 
     private String email;
 
+    private String name;
+    private String lastName;
+    private String phoneNumber;
+    private String age;
+
     @JsonIgnore
     private String password;
 
@@ -33,7 +38,12 @@ public class UserDetailImpl implements UserDetails, OAuth2User {
 
     public UserDetailImpl(Integer id,
                           String username, String email, String password,
+                          String name, String lastName, String phoneNumber, String age,
                           Collection<? extends GrantedAuthority> authorities) {
+        this.name = name;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.age = age;
         this.id = id;
         this.username = username;
         this.email = email;
@@ -51,6 +61,10 @@ public class UserDetailImpl implements UserDetails, OAuth2User {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getName(),
+                user.getLastname(),
+                user.getPhoneNumber(),
+                user.getAge(),
                 authorities
         );
     }
@@ -124,5 +138,53 @@ public class UserDetailImpl implements UserDetails, OAuth2User {
     @Override
     public String getName() {
         return String.valueOf(id);
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        this.authorities = authorities;
     }
 }
