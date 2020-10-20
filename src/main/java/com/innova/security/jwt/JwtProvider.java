@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtProvider {
@@ -54,37 +56,46 @@ public class JwtProvider {
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + Integer.parseInt(jwtRefreshTokenExpiration)))
+                .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtRefreshTokenExpiration)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForRefreshToken)
                 .compact();
     }
 
     public String generateJwtToken(Authentication authentication) {
-
-        StringBuilder payload = new StringBuilder();
+        Map<String, Object> claims = new HashMap<>();
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
-
-        payload.append(userPrincipal.getId());
-        payload.append(userPrincipal.getAuthorities());
-        payload.append(userPrincipal.getName());
+        System.out.println(userPrincipal.getUsername());
+//        TODO correct user detail impl
+//        claims.put("id", userPrincipal.getId());
+        claims.put("authorities", userPrincipal.getAuthorities());
+        claims.put("name", userPrincipal.getName());
+        claims.put("username", userPrincipal.getUsername());
+        claims.put("email", userPrincipal.getEmail());
 
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + Integer.parseInt(jwtAccessTokenExpiration)))
                 .setId(userPrincipal.getId().toString())
-                .setPayload(String.valueOf(payload))
+                .setClaims(claims)
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
                 .compact();
     }
 
     public String getUserNameFromJwtToken(String token, String matter) {
         String secret = getSecret(matter);
-
-        return Jwts.parser()
+        return  (String) Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)
-                .getBody().getSubject();
+                .getBody().get("username");
+    }
+
+    public String getEmailFromJwtToken(String token, String matter) {
+        String secret = getSecret(matter);
+        return  (String) Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody().get("email");
     }
 
     public boolean validateJwtToken(String authToken, String matter) {
