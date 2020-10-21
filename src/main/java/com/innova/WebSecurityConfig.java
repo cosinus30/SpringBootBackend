@@ -77,9 +77,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.html",
                         "/**/*.jpg").permitAll()
                 .antMatchers(
-                        "/api/auth/confirmRegistration/**",
-                        "/api/auth/sign-up/**",
-                        "/api/auth/signin/**",
+                        "/api/auth/**/",
                         "/oauth2/**")
                 .permitAll()
                 .anyRequest().authenticated()

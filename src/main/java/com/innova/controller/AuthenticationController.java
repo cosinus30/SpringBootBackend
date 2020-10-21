@@ -72,15 +72,17 @@ public class AuthenticationController {
                 )
         );
 
-        Optional<User> user = userRepository.findByUsername(loginForm.getUsername());
+        User user = userRepository.findByUsername(loginForm.getUsername()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
 
-        if (!user.get().isEnabled()) {
+        if (!user.isEnabled()) {
             throw new AccountNotActivatedException("Account has not been activated.");
         }
 
+        UserDetailImpl userPrincipal = UserDetailImpl.build(user);
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = jwtProvider.generateJwtToken(authentication);
+        String accessToken = jwtProvider.generateJwtToken(userPrincipal);
         String refreshToken = jwtProvider.generateRefreshToken(authentication);
 
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
@@ -142,21 +144,23 @@ public class AuthenticationController {
         if(token == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("Token cannot be empty"));
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if(authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")){
-            if(jwtProvider.validateJwtToken(token, "refresh", request)){
-                Map<String, Object> response = new HashMap<>();
-                String newAccessToken = jwtProvider.generateJwtToken(authentication);
-                response.put("Access token", newAccessToken);
-                return ResponseEntity.ok(response);
-            }
-            else{
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
-            }
+        String email = jwtProvider.getUserNameFromJwtToken(token, "refresh");
+        System.out.println(email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Fail! -> Cause: Email not found."));
+        if (!user.isEnabled()) {
+            throw new AccountNotActivatedException("Account has not been activated.");
+        }
+        UserDetailImpl userPrincipal = UserDetailImpl.build(user);
+
+        if(jwtProvider.validateJwtToken(token, "refresh", request)){
+            Map<String, Object> response = new HashMap<>();
+            String newAccessToken = jwtProvider.generateJwtToken(userPrincipal);
+            response.put("Access token", newAccessToken);
+            return ResponseEntity.ok(response);
         }
         else{
-            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Arrays.asList("Unathorized access. Must be logged in to ask for access token"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
     }
 }

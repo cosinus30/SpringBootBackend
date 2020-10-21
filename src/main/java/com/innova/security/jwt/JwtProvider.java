@@ -46,7 +46,7 @@ public class JwtProvider {
 
     public String generateJwtTokenForVerification(User user){
         return Jwts.builder()
-                .setSubject((user.getUsername()))
+                .setSubject((user.getEmail()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtVerificationTokenExpiration)))
                 .signWith(SignatureAlgorithm.HS512, jtwSecretForVerification)
@@ -56,16 +56,15 @@ public class JwtProvider {
     public String generateRefreshToken(Authentication authentication) {
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject((userPrincipal.getEmail()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtRefreshTokenExpiration)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForRefreshToken)
                 .compact();
     }
 
-    public String generateJwtToken(Authentication authentication) {
+    public String generateJwtToken(UserDetailImpl userPrincipal) {
         Map<String, Object> claims = new HashMap<>();
-        UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
         System.out.println(userPrincipal.getUsername());
 
         claims.put("id", userPrincipal.getId());
