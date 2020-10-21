@@ -121,12 +121,12 @@ public class AuthenticationController {
     }
 
     @GetMapping("/confirmRegistration")
-    public String confirmRegistration(@RequestParam("token") String token) {
+    public String confirmRegistration(@RequestParam("token") String token, HttpServletRequest request) {
         if (token == null) {
             return "token not given";
         }
 
-        if (token != null && jwtProvider.validateJwtToken(token, "verification")) {
+        if (token != null && jwtProvider.validateJwtToken(token, "verification", request)) {
             String username = jwtProvider.getUserNameFromJwtToken(token, "verification");
             User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
             user.setEnabled(true);
@@ -138,14 +138,14 @@ public class AuthenticationController {
     }
 
     @GetMapping("/refresh-token")
-    public ResponseEntity<?> getAccessToken(@RequestParam("token") String token){
+    public ResponseEntity<?> getAccessToken(@RequestParam("token") String token,  HttpServletRequest request){
         if(token == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("Token cannot be empty"));
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")){
-            if(jwtProvider.validateJwtToken(token, "refresh")){
+            if(jwtProvider.validateJwtToken(token, "refresh", request)){
                 Map<String, Object> response = new HashMap<>();
                 String newAccessToken = jwtProvider.generateJwtToken(authentication);
                 response.put("Access token", newAccessToken);

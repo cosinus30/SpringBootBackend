@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.innova.exception.AccessTokenExpiredException;
 import com.innova.model.Attempt;
 import com.innova.repository.AttemptRepository;
 import com.innova.security.services.UserDetailsServiceImpl;
@@ -40,7 +41,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
-            throws ServletException, IOException {
+            throws ServletException, IOException, AccessTokenExpiredException {
 
         if(!attemptRepository.existsByIp(request.getRemoteAddr())) {
             Attempt attempt = new Attempt(request.getRemoteAddr(), 0, LocalDateTime.now());
@@ -49,7 +50,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
         try {
             String jwt = getJwt(request);
-            if (jwt != null && tokenProvider.validateJwtToken(jwt, "authorize")) {
+            if (jwt != null && tokenProvider.validateJwtToken(jwt, "authorize", request)) {
                 String email = tokenProvider.getEmailFromJwtToken(jwt, "authorize");
                 UserDetails userDetails = userDetailsService.loadUserByEmail(email);
 
@@ -59,8 +60,8 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             logger.error("Can NOT set user authentication -> Message: {}", e);
         }
         filterChain.doFilter(request, response);

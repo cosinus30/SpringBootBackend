@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,7 +104,7 @@ public class JwtProvider {
                 .getBody().get("email");
     }
 
-    public boolean validateJwtToken(String authToken, String matter) {
+    public boolean validateJwtToken(String authToken, String matter, HttpServletRequest request) throws AccessTokenExpiredException {
         String secret = getSecret(matter);
         try {
             if(!matter.equals("verification") && checkExistence(authToken)){
@@ -116,7 +117,8 @@ public class JwtProvider {
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token -> Message: {}", e);
         } catch (ExpiredJwtException e) {
-            throw new AccessTokenExpiredException("Expired JWT token.");
+            request.setAttribute("expired", e.getMessage());
+            logger.error("Expired JWT token -> Message: {}");
         } catch (UnsupportedJwtException e) {
             logger.error("Unsupported JWT token -> Message: {}", e);
         } catch (IllegalArgumentException e) {

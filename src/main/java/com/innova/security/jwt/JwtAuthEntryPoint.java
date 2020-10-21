@@ -3,28 +3,31 @@ package com.innova.security.jwt;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Optional;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.innova.exception.AccountNotActivatedException;
 import com.innova.model.Attempt;
 import com.innova.repository.AttemptRepository;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+
+
 
 @Component
 public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthEntryPoint.class);
+
 
     @Autowired
     AttemptRepository attemptRepository;
@@ -55,6 +58,24 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             }
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.getWriter().write("Username or password is incorrect.");
+        }
+        else{
+            final String expired = (String) request.getAttribute("expired");
+            System.out.println(expired);
+            if (expired != null){
+                String jsonString = new JSONObject()
+                        .put("timestamp", new Date())
+                        .put("status", HttpStatus.UNAUTHORIZED.value())
+                        .put("error", HttpStatus.UNAUTHORIZED)
+                        .put("message", expired)
+                        .put("path", request.getPathInfo())
+                        .toString();
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.getWriter().write(jsonString);
+            }
+            else{
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Invalid Login details");
+            }
         }
 
     }
