@@ -72,8 +72,7 @@ public class JwtProvider {
         claims.put("name", userPrincipal.getName());
         claims.put("username", userPrincipal.getUsername());
         claims.put("email", userPrincipal.getEmail());
-        claims.put("exp", new Date((new Date()).getTime() + Long.parseLong(jwtAccessTokenExpiration)));
-        claims.put("iat", new Date());
+
         claims.put("subject", (userPrincipal.getUsername()));
 
         System.out.println(new Date());
@@ -83,6 +82,8 @@ public class JwtProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtAccessTokenExpiration)))
                 .compact();
     }
 
