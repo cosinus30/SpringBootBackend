@@ -42,3 +42,5 @@ innova:
   oauth2:
     authorizedRedirectUris:
       - http://localhost:4200/auth
+
+captcha_server_key: 6LcQ1tIZAAAAAIpcuDo0eEh8UtK0sDZ6lshWmY6N
