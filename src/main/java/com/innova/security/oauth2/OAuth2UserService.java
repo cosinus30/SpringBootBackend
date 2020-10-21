@@ -74,6 +74,7 @@ class OAuth2UserService extends DefaultOAuth2UserService {
         user.setName(oAuth2UserInfo.getFirstName());
         user.setLastname(oAuth2UserInfo.getLastName());
         user.setEmail(oAuth2UserInfo.getEmail());
+        user.setEnabled(true);
         return userRepository.save(user);
     }
 }
