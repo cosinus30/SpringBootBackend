@@ -18,6 +18,7 @@ import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -123,19 +126,25 @@ public class AuthenticationController {
     }
 
     @GetMapping("/confirmRegistration")
-    public String confirmRegistration(@RequestParam("token") String token, HttpServletRequest request) {
+    public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token, HttpServletRequest request) throws URISyntaxException {
         if (token == null) {
-            return "token not given";
+            return new ResponseEntity(HttpStatus.SEE_OTHER);
         }
 
         if (token != null && jwtProvider.validateJwtToken(token, "verification", request)) {
             String username = jwtProvider.getUserNameFromJwtToken(token, "verification");
-            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
+            User user = userRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
             user.setEnabled(true);
             userRepository.save(user);
-            return "Thank you!";
+
+//            URI yahoo = new URI("http://localhost:4200/");
+//            HttpHeaders httpHeaders = new HttpHeaders();
+//            httpHeaders.setContentLength(3000);
+//            httpHeaders.setLocation(yahoo);
+//            return new ResponseEntity(httpHeaders, HttpStatus.SEE_OTHER);
+            return new ResponseEntity(HttpStatus.OK);
         } else {
-            return "Something is wrong!";
+            return new ResponseEntity(HttpStatus.SEE_OTHER);
         }
     }
 
