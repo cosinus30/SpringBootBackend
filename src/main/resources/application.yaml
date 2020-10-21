@@ -26,7 +26,6 @@ spring:
           google:
             clientId: 23500386943-9hrfde5uu9qvugpa1bq3cacdsqbbdu0o.apps.googleusercontent.com
             clientSecret: 9cVEFgH3MjLjwbEZ08gDq_hQ
-            client_server_key: 6LcQ1tIZAAAAAIpcuDo0eEh8UtK0sDZ6lshWmY6N
             redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - email
