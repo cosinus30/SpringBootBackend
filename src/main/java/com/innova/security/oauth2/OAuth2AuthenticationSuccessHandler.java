@@ -3,6 +3,7 @@ package com.innova.security.oauth2;
 import com.innova.config.AppProperties;
 import com.innova.exception.BadRequestException;
 import com.innova.security.jwt.JwtProvider;
+import com.innova.security.services.UserDetailImpl;
 import com.innova.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,10 +62,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
-        String token = tokenProvider.generateJwtToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken(authentication);
+        String accessToken = tokenProvider.generateJwtToken((UserDetailImpl) authentication.getPrincipal());
 
         return UriComponentsBuilder.fromUriString(targetUrl)
-                .queryParam("token", token)
+                .queryParam("refreshToken", refreshToken)
+                .queryParam("accessToken", accessToken)
                 .build().toUriString();
     }
 
