@@ -147,7 +147,7 @@ public class AuthenticationController {
         }
 
         if (token != null && jwtProvider.validateJwtToken(token, "verification", request)) {
-            String username = jwtProvider.getUserNameFromJwtToken(token, "verification");
+            String username = jwtProvider.getSubjectFromJwt(token, "verification");
             User user = userRepository.findByEmail(username).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
             user.setEnabled(true);
             userRepository.save(user);
@@ -174,7 +174,7 @@ public class AuthenticationController {
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
 
-        String email = jwtProvider.getUserNameFromJwtToken(token, "refresh");
+        String email = jwtProvider.getSubjectFromJwt(token, "refresh");
         System.out.println(email);
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Fail! -> Cause: Email not found."));
         if (!user.isEnabled()) {

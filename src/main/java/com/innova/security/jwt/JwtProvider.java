@@ -65,19 +65,9 @@ public class JwtProvider {
 
     public String generateJwtToken(UserDetailImpl userPrincipal) {
         Map<String, Object> claims = new HashMap<>();
-        System.out.println(userPrincipal.getUsername());
 
-        claims.put("id", userPrincipal.getId());
-        claims.put("authorities", userPrincipal.getAuthorities());
-        claims.put("name", userPrincipal.getName());
         claims.put("username", userPrincipal.getUsername());
-        claims.put("email", userPrincipal.getEmail());
-
-        claims.put("subject", (userPrincipal.getUsername()));
-
-        System.out.println(new Date());
-        System.out.println(new Date((new Date()).getTime() + Long.parseLong(jwtAccessTokenExpiration)));
-
+        claims.put("subject", (userPrincipal.getEmail()));
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -87,20 +77,12 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String getUserNameFromJwtToken(String token, String matter) {
+    public String getSubjectFromJwt(String token, String matter) {
         String secret = getSecret(matter);
         return  Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody().getSubject();
-    }
-
-    public String getEmailFromJwtToken(String token, String matter) {
-        String secret = getSecret(matter);
-        return  (String) Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody().get("email");
     }
 
     public boolean validateJwtToken(String authToken, String matter, HttpServletRequest request) throws AccessTokenExpiredException {

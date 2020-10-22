@@ -74,14 +74,13 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 myMap.put("error", expired);
                 String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
             }
             else{
                 myMap.put("error", "Invalid Login details" );
                 String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
             }
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
     }
 
