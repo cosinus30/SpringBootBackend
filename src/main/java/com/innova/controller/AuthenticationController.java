@@ -19,6 +19,7 @@ import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -148,7 +150,10 @@ public class AuthenticationController {
     @GetMapping("/confirmRegistration")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token, HttpServletRequest request) throws URISyntaxException {
         if (token == null) {
-            return new ResponseEntity(HttpStatus.SEE_OTHER);
+            //Token is empty redirect to error or something
+            return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                    .location(URI.create("http://localhost:4200"))
+                    .build();
         }
 
         if (token != null && jwtProvider.validateJwtToken(token, "verification", request)) {
@@ -157,14 +162,14 @@ public class AuthenticationController {
             user.setEnabled(true);
             userRepository.save(user);
 
-//            URI yahoo = new URI("http://localhost:4200/");
-//            HttpHeaders httpHeaders = new HttpHeaders();
-//            httpHeaders.setContentLength(3000);
-//            httpHeaders.setLocation(yahoo);
-//            return new ResponseEntity(httpHeaders, HttpStatus.SEE_OTHER);
-            return new ResponseEntity(HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                    .location(URI.create("http://localhost:4200"))
+                    .build();
         } else {
-            return new ResponseEntity(HttpStatus.SEE_OTHER);
+            // Token is not valid
+            return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                    .location(URI.create("http://localhost:4200"))
+                    .build();
         }
     }
 
