@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/user")
@@ -82,15 +85,22 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser(@RequestBody LogoutForm logoutForm){
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/logout");
         if(logoutForm.getAccessToken() == null || logoutForm.getRefreshToken() == null){
-            return ResponseEntity.badRequest().body("Both tokens should be provided");
+            myMap.put("error", "Both tokens should be provided");
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
         }
         else{
             TokenBlacklist oldAccessToken = new TokenBlacklist(logoutForm.getAccessToken(), "access token");
             TokenBlacklist oldRefreshToken = new TokenBlacklist(logoutForm.getRefreshToken(), "refresh token");
             tokenBlacklistRepository.save(oldAccessToken);
             tokenBlacklistRepository.save(oldRefreshToken);
-            return ResponseEntity.ok().body("Successfully logged out");
+            myMap.put("message", "Successfully logged out");
+            myMap.put("status", HttpStatus.OK.value());
+            return new ResponseEntity(myMap, HttpStatus.OK);
         }
 
     }
