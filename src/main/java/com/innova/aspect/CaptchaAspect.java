@@ -43,11 +43,6 @@ public class CaptchaAspect {
                         throw new CaptchaExpectedException(ex.getMessage());
                     }
                 }
-                else{
-                    attempt.setAttemptCounter(0);
-                    attemptRepository.save(attempt);
-                    return joinPoint.proceed();
-                }
             }
             return joinPoint.proceed();
         }
