@@ -71,7 +71,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
         else{
             final String expired = (String) request.getAttribute("expired");
             if (expired != null){
-                myMap.put("error", expired);
+                myMap.put("error", "JWT Expired.");
                 String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
             }

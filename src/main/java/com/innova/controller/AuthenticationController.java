@@ -4,6 +4,7 @@ import com.innova.aspect.RequiresCaptcha;
 import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.AccountNotActivatedException;
 import com.innova.exception.ErrorWhileSendingEmailException;
+import com.innova.model.Attempt;
 import com.innova.model.Role;
 import com.innova.model.Roles;
 import com.innova.model.User;
@@ -93,15 +94,19 @@ public class AuthenticationController {
 
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
-
+        if(attemptRepository.existsByIp(request.getRemoteAddr())) {
+            Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).get();
+            attempt.setAttemptCounter(0);
+            attemptRepository.save(attempt);
+        }
         return ResponseEntity.ok(new LoginResponse(accessToken,
-                                                    refreshToken,
-                                                    userDetails.getId(),
-                                                    userDetails.getUsername(),
-                                                    userDetails.getEmail(),
-                                                    roles,
-                                                    userDetails.getName(),
-                                                    userDetails.getLastName()));
+                refreshToken,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles,
+                userDetails.getName(),
+                userDetails.getLastName()));
     }
 
     @PostMapping("sign-up")
@@ -185,7 +190,7 @@ public class AuthenticationController {
         if(jwtProvider.validateJwtToken(token, "refresh", request)){
             Map<String, Object> response = new HashMap<>();
             String newAccessToken = jwtProvider.generateJwtToken(userPrincipal);
-            response.put("Access token", newAccessToken);
+            response.put("accessToken", newAccessToken);
             return ResponseEntity.ok(response);
         }
         else{
