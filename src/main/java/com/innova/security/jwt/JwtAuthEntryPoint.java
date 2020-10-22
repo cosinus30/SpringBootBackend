@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.ServletException;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.innova.model.Attempt;
 import com.innova.repository.AttemptRepository;
+import com.innova.util.JsonUtil;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +34,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
     @Autowired
     AttemptRepository attemptRepository;
+
 
     @Override
     public void commence(HttpServletRequest request,
@@ -63,13 +67,14 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             final String expired = (String) request.getAttribute("expired");
             System.out.println(expired);
             if (expired != null){
-                String jsonString = new JSONObject()
-                        .put("timestamp", new Date())
-                        .put("status", HttpStatus.UNAUTHORIZED.value())
-                        .put("error", HttpStatus.UNAUTHORIZED)
-                        .put("message", expired)
-                        .put("path", request.getPathInfo())
-                        .toString();
+                Map<String, Object> myMap = new HashMap<>();
+                myMap.put("timestamp", new Date());
+                myMap.put("status", HttpStatus.UNAUTHORIZED.value());
+                myMap.put("error", HttpStatus.UNAUTHORIZED);
+                myMap.put("message", expired);
+                myMap.put("path", request.getPathInfo());
+                String jsonString = JsonUtil.buildJsonString(myMap);
+
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.getWriter().write(jsonString);
             }
