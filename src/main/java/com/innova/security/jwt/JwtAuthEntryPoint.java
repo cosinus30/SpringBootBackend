@@ -42,6 +42,10 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException e)
             throws IOException, ServletException {
         String jwt = getJwt(request);
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("status", HttpStatus.UNAUTHORIZED.value());
+        myMap.put("path", "api/auth");
         if(jwt == null){
             if(attemptRepository.existsByIp(request.getRemoteAddr())) {
                 Optional<Attempt> optionalAttempt = attemptRepository.findById(request.getRemoteAddr());
@@ -60,29 +64,23 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 Attempt attempt = new Attempt(request.getRemoteAddr(), 1, LocalDateTime.now());
                 attemptRepository.save(attempt);
             }
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.getWriter().write("Username or password is incorrect.");
+            myMap.put("error", "JWT cannot be empty");
+            String jsonString = JsonUtil.buildJsonString(myMap);
+            response.getWriter().write(jsonString);
         }
         else{
             final String expired = (String) request.getAttribute("expired");
-            System.out.println(expired);
             if (expired != null){
-                Map<String, Object> myMap = new HashMap<>();
-                myMap.put("timestamp", new Date());
-                myMap.put("status", HttpStatus.UNAUTHORIZED.value());
-                myMap.put("error", HttpStatus.UNAUTHORIZED);
-                myMap.put("message", expired);
-                myMap.put("path", request.getPathInfo());
+                myMap.put("error", expired);
                 String jsonString = JsonUtil.buildJsonString(myMap);
-
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.getWriter().write(jsonString);
             }
             else{
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Invalid Login details");
+                myMap.put("error", "Invalid Login details" );
+                String jsonString = JsonUtil.buildJsonString(myMap);
+                response.getWriter().write(jsonString);
             }
         }
-
     }
 
     private String getJwt(HttpServletRequest request) {
