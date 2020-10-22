@@ -58,7 +58,6 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 } else {
                     attempt.setAttemptCounter(attempt.getAttemptCounter() + 1);
                 }
-
                 attemptRepository.save(attempt);
             } else {
                 Attempt attempt = new Attempt(request.getRemoteAddr(), 1, LocalDateTime.now());
@@ -67,6 +66,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             myMap.put("error", "JWT cannot be empty");
             String jsonString = JsonUtil.buildJsonString(myMap);
             response.getWriter().write(jsonString);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
         else{
             final String expired = (String) request.getAttribute("expired");
@@ -74,11 +74,13 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 myMap.put("error", expired);
                 String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
             }
             else{
                 myMap.put("error", "Invalid Login details" );
                 String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
             }
         }
     }
