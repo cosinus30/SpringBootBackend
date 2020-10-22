@@ -18,7 +18,6 @@ import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,11 +27,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,8 +61,14 @@ public class AuthenticationController {
     @PostMapping("signin")
     @RequiresCaptcha
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) throws IOException, AccountNotActivatedException {
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/signin");
+
         if(loginForm.getPassword() == null || loginForm.getUsername() == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("Username and password should be provided"));
+            myMap.put("error","Username and password should be provided" );
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -103,24 +106,28 @@ public class AuthenticationController {
 
     @PostMapping("sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpForm) {
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/sign-up");
         if (userRepository.existsByUsername(signUpForm.getUsername())) {
-            return new ResponseEntity<String>("Username is already taken!", HttpStatus.BAD_REQUEST);
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            myMap.put("error", "Username is already taken!");
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
+
         }
 
         if (userRepository.existsByEmail(signUpForm.getEmail())) {
-            return new ResponseEntity<String>("Email is already in use!", HttpStatus.BAD_REQUEST);
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            myMap.put("error", "Email is already in use!");
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
 
         User user = new User(signUpForm.getUsername(), signUpForm.getEmail(), passwordEncoder.encode(signUpForm.getPassword()));
-
         Set<Role> roles = new HashSet<>();
-
         Role userRole = roleRepository.findByRole(Roles.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
         roles.add(userRole);
-
         user.setRoles(roles);
-
         userRepository.save(user);
 
         try {
@@ -128,8 +135,9 @@ public class AuthenticationController {
         } catch (Exception re) {
             throw new ErrorWhileSendingEmailException(re.getMessage());
         }
-
-        return ResponseEntity.ok().body("User registered successfully!");
+        myMap.put("status", HttpStatus.CREATED.value());
+        myMap.put("message", "User registered successfully!");
+        return new ResponseEntity<>(myMap, HttpStatus.CREATED);
     }
 
     @GetMapping("/confirmRegistration")
@@ -157,8 +165,13 @@ public class AuthenticationController {
 
     @GetMapping("/refresh-token")
     public ResponseEntity<?> getAccessToken(@RequestParam("token") String token,  HttpServletRequest request){
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/refresh-token");
         if(token == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("Token cannot be empty"));
+            myMap.put("error", "Token cannot be empty");
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
 
         String email = jwtProvider.getUserNameFromJwtToken(token, "refresh");
@@ -176,7 +189,9 @@ public class AuthenticationController {
             return ResponseEntity.ok(response);
         }
         else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+            myMap.put("error", "Invalid refresh token");
+            myMap.put("status", HttpStatus.UNAUTHORIZED.value());
+            return new ResponseEntity<>(myMap, HttpStatus.UNAUTHORIZED);
         }
     }
 }
