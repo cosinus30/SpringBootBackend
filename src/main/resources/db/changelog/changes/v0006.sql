@@ -8,7 +8,7 @@ create table if not exists "cloud_users"
     name        varchar(25),
     lastname    varchar(25),
     age         varchar(3),
-    phoneNumber varchar(10)
+    phone_number varchar(10)
 );
 
 create table if not exists "cloud_roles"
