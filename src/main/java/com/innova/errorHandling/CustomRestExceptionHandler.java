@@ -194,7 +194,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
         final String error = "Captcha was expected.";
 
-        ApiError apiError = new ApiError(HttpStatus.EXPECTATION_FAILED, ex.getLocalizedMessage(), error);
+        ApiError apiError = new ApiError(HttpStatus.TOO_MANY_REQUESTS, ex.getLocalizedMessage(), error);
         return new ResponseEntity<>(apiError, apiError.getStatus());
     }
 
