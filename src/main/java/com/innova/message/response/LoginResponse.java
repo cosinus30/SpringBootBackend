@@ -8,6 +8,8 @@ public class LoginResponse {
     private String type = "Bearer";
     private String email;
     private String username;
+    private String name;
+    private String lastName;
     private List<String> roles;
     private Integer id;
 
@@ -15,10 +17,28 @@ public class LoginResponse {
         this.accessToken = accessToken;
     }
 
-    public LoginResponse(String accessToken,String refreshToken, Integer id, String username, String email, List<String> roles) {
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public LoginResponse(String accessToken, String refreshToken, Integer id, String username, String email, List<String> roles, String name, String lastName) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.id = id;
+        this.name = name;
+        this.lastName = lastName;
         this.username = username;
         this.email = email;
         this.roles = roles;

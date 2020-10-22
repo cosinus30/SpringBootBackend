@@ -91,7 +91,14 @@ public class AuthenticationController {
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        return ResponseEntity.ok(new LoginResponse(accessToken, refreshToken, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+        return ResponseEntity.ok(new LoginResponse(accessToken,
+                                                    refreshToken,
+                                                    userDetails.getId(),
+                                                    userDetails.getUsername(),
+                                                    userDetails.getEmail(),
+                                                    roles,
+                                                    userDetails.getName(),
+                                                    userDetails.getLastName()));
     }
 
     @PostMapping("sign-up")
