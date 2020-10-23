@@ -124,12 +124,12 @@ public class UserController {
                     myMap.put("status", HttpStatus.BAD_REQUEST.value());
                     return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
                 }
-                else if(changePasswordForm.getNewPassword() != changePasswordForm.getNewPasswordConfirmation()){
+                else if(!changePasswordForm.getNewPassword().equals(changePasswordForm.getNewPasswordConfirmation())){
                     myMap.put("error", "Password fields does not match");
                     myMap.put("status", HttpStatus.BAD_REQUEST.value());
                     return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
                 }
-                else if(changePasswordForm.getNewPassword() == changePasswordForm.getNewPasswordConfirmation()){
+                else if(changePasswordForm.getNewPassword().equals(changePasswordForm.getNewPasswordConfirmation())){
                     user.setPassword(passwordEncoder.encode(changePasswordForm.getNewPassword()));
                     userRepository.save(user);
                     myMap.put("message", "Password successfully changed");
