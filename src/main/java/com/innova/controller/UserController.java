@@ -112,12 +112,14 @@ public class UserController {
         if (authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
             UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
             User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
-            if (changePasswordForm.checkAllFieldsAreGiven(changePasswordForm)) {
+        
+
+            if (!changePasswordForm.checkAllFieldsAreGiven(changePasswordForm)) {
                 myMap.put("error", "All fields should be given");
                 myMap.put("status", HttpStatus.BAD_REQUEST.value());
                 return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
             } else {
-                if(user.getPassword() != passwordEncoder.encode(changePasswordForm.getOldPassword())){
+                if(!passwordEncoder.matches(changePasswordForm.getOldPassword(), user.getPassword())){
                     myMap.put("error", "Your old password is not correct");
                     myMap.put("status", HttpStatus.BAD_REQUEST.value());
                     return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
