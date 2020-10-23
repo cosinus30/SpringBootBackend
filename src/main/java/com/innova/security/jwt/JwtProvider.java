@@ -66,11 +66,10 @@ public class JwtProvider {
     public String generateJwtToken(UserDetailImpl userPrincipal) {
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("username", userPrincipal.getUsername());
-        claims.put("subject", (userPrincipal.getEmail()));
+
 
         return Jwts.builder()
-                .setClaims(claims)
+                .setSubject(userPrincipal.getEmail())
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtAccessTokenExpiration)))
@@ -79,10 +78,11 @@ public class JwtProvider {
 
     public String getSubjectFromJwt(String token, String matter) {
         String secret = getSecret(matter);
-        return  (String)Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody().get("subject");
+        return Jwts.parser()
+            .setSigningKey(secret)
+            .parseClaimsJws(token)
+            .getBody().getSubject();
+
     }
 
     public boolean validateJwtToken(String authToken, String matter, HttpServletRequest request) throws AccessTokenExpiredException {
