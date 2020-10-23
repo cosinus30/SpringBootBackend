@@ -1,6 +1,7 @@
 package com.innova.controller;
 
 import com.innova.aspect.RequiresCaptcha;
+import com.innova.event.OnPasswordForgotEvent;
 import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.AccountNotActivatedException;
 import com.innova.exception.ErrorWhileSendingEmailException;
@@ -8,6 +9,7 @@ import com.innova.model.Attempt;
 import com.innova.model.Role;
 import com.innova.model.Roles;
 import com.innova.model.User;
+import com.innova.message.request.ForgotPasswordForm;
 import com.innova.message.request.LoginForm;
 import com.innova.message.request.SignUpForm;
 import com.innova.message.response.LoginResponse;
@@ -19,7 +21,6 @@ import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -202,6 +203,30 @@ public class AuthenticationController {
             myMap.put("error", "Invalid refresh token");
             myMap.put("status", HttpStatus.UNAUTHORIZED.value());
             return new ResponseEntity<>(myMap, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordForm forgotPasswordForm){
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/forgot-password");
+        String email = forgotPasswordForm.getEmail();
+
+        if(!userRepository.existsByEmail(email)){
+            myMap.put("error", "No such user");
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
+        }
+        else{
+            try {
+                eventPublisher.publishEvent(new OnPasswordForgotEvent(email));
+                myMap.put("message", "Email successfuly sent.");
+                myMap.put("status", HttpStatus.OK.value());
+                return new ResponseEntity<>(myMap, HttpStatus.OK);
+            } catch (Exception re) {
+                throw new ErrorWhileSendingEmailException(re.getMessage());
+            }
         }
     }
 }
