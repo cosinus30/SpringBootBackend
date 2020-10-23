@@ -41,6 +41,12 @@ public class JwtProvider {
     @Value("${innova.app.jwtVerificationTokenExpiration}")
     private String jwtVerificationTokenExpiration;
 
+    @Value("${innova.app.jtwSecretForPassword}")
+    private String jtwSecretForPassword;
+    @Value("${innova.app.jwtPasswordTokenExpiration}")
+    private String jwtPasswordTokenExpiration;
+
+
 
     public JwtProvider(){}
 
@@ -50,6 +56,15 @@ public class JwtProvider {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtVerificationTokenExpiration)))
                 .signWith(SignatureAlgorithm.HS512, jtwSecretForVerification)
+                .compact();
+    }
+
+    public String generateJwtTokenForPassword(String email){
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + Long.parseLong(jwtPasswordTokenExpiration)))
+                .signWith(SignatureAlgorithm.HS512, jtwSecretForPassword)
                 .compact();
     }
 
@@ -120,6 +135,8 @@ public class JwtProvider {
                 return jwtSecretForAccessToken;
             case "refresh":
                 return jwtSecretForRefreshToken;
+            case "password":
+                return jtwSecretForPassword;
             default:
                 return null;
         }
