@@ -79,10 +79,10 @@ public class JwtProvider {
 
     public String getSubjectFromJwt(String token, String matter) {
         String secret = getSecret(matter);
-        return  Jwts.parser()
+        return  (String)Jwts.parser()
                 .setSigningKey(secret)
                 .parseClaimsJws(token)
-                .getBody().getSubject();
+                .getBody().get("subject");
     }
 
     public boolean validateJwtToken(String authToken, String matter, HttpServletRequest request) throws AccessTokenExpiredException {
