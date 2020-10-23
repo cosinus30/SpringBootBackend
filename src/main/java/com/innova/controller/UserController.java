@@ -2,12 +2,15 @@ package com.innova.controller;
 
 
 import com.innova.message.request.ChangePasswordForm;
+import com.innova.message.request.ForgotAndChangePasswordForm;
 import com.innova.message.request.LogoutForm;
+import com.innova.exception.BadRequestException;
 import com.innova.message.request.ChangeForm;
 import com.innova.model.TokenBlacklist;
 import com.innova.model.User;
 import com.innova.repository.TokenBlacklistRepository;
 import com.innova.repository.UserRepository;
+import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.Date;
@@ -35,6 +39,9 @@ public class UserController {
 
     @Autowired
     TokenBlacklistRepository tokenBlacklistRepository;
+
+    @Autowired
+    JwtProvider jwtProvider;
 
     @GetMapping("/")
     public ResponseEntity<?> getUser() {
@@ -147,6 +154,47 @@ public class UserController {
             myMap.put("error", "Unauthorized access");
             myMap.put("status", HttpStatus.UNAUTHORIZED.value());
             return new ResponseEntity(myMap, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/create-new-password")
+    public ResponseEntity<?> createNewPassword(@RequestBody ForgotAndChangePasswordForm forgotAndChangePasswordForm, HttpServletRequest request){
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/create-new-password");
+        if(!forgotAndChangePasswordForm.checkAllFieldsAreGiven(forgotAndChangePasswordForm)){
+            myMap.put("error", "All fields should be given");
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
+        }
+        else{
+            String token = forgotAndChangePasswordForm.getToken();
+            if(token!= null && jwtProvider.validateJwtToken(token,"password",request)){
+                String email = jwtProvider.getSubjectFromJwt(token, "password");
+                User user = userRepository.findByEmail(email).orElseThrow(() -> new BadRequestException("Fail! -> Cause: User not found."));
+                if(!forgotAndChangePasswordForm.getNewPassword().equals(forgotAndChangePasswordForm.getNewPasswordConfirmation())){
+                    myMap.put("error", "Password fields does not match");
+                    myMap.put("status", HttpStatus.BAD_REQUEST.value());
+                    return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
+                }
+                else if(forgotAndChangePasswordForm.getNewPassword().equals(forgotAndChangePasswordForm.getNewPasswordConfirmation())){
+                    user.setPassword(passwordEncoder.encode(forgotAndChangePasswordForm.getNewPassword()));
+                    userRepository.save(user);
+                    myMap.put("message", "Password successfully changed");
+                    myMap.put("status", HttpStatus.OK.value());
+                    return new ResponseEntity(myMap, HttpStatus.OK);
+                }
+                else{
+                    myMap.put("error", "Something is wrong");
+                    myMap.put("status", HttpStatus.BAD_REQUEST.value());
+                    return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
+                }
+            }
+            else{
+                myMap.put("error", "Something is wrong with that token!");
+                myMap.put("status", HttpStatus.BAD_REQUEST.value());
+                return new ResponseEntity(myMap, HttpStatus.BAD_REQUEST);
+            }
         }
     }
 }
