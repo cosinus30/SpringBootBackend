@@ -38,15 +38,19 @@ public class User {
     private String password;
 
     @Size(min = 3, max = 25)
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "lastname")
     @Size(min = 3, max = 25)
     private String lastname;
 
+    @Column(name = "age")
     @Size(min = 1, max = 3)
     private String age;
 
     @Size(min = 10, max = 10)
+    @Column(name = "phone_number")
     private String phoneNumber;
 
     @ManyToMany(fetch = FetchType.EAGER)

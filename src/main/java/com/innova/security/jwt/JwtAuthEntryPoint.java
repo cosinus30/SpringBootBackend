@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.ServletException;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.innova.model.Attempt;
 import com.innova.repository.AttemptRepository;
+import com.innova.util.JsonUtil;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +35,17 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
     @Autowired
     AttemptRepository attemptRepository;
 
+
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException e)
             throws IOException, ServletException {
         String jwt = getJwt(request);
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("status", HttpStatus.UNAUTHORIZED.value());
+        myMap.put("path", "api/auth");
         if(jwt == null){
             if(attemptRepository.existsByIp(request.getRemoteAddr())) {
                 Optional<Attempt> optionalAttempt = attemptRepository.findById(request.getRemoteAddr());
@@ -50,34 +58,30 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 } else {
                     attempt.setAttemptCounter(attempt.getAttemptCounter() + 1);
                 }
-
                 attemptRepository.save(attempt);
             } else {
                 Attempt attempt = new Attempt(request.getRemoteAddr(), 1, LocalDateTime.now());
                 attemptRepository.save(attempt);
             }
+            myMap.put("error", "JWT cannot be empty");
+            String jsonString = JsonUtil.buildJsonString(myMap);
+            response.getWriter().write(jsonString);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.getWriter().write("Username or password is incorrect.");
         }
         else{
             final String expired = (String) request.getAttribute("expired");
-            System.out.println(expired);
             if (expired != null){
-                String jsonString = new JSONObject()
-                        .put("timestamp", new Date())
-                        .put("status", HttpStatus.UNAUTHORIZED.value())
-                        .put("error", HttpStatus.UNAUTHORIZED)
-                        .put("message", expired)
-                        .put("path", request.getPathInfo())
-                        .toString();
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                myMap.put("error", "JWT Expired.");
+                String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
             }
             else{
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Invalid Login details");
+                myMap.put("error", "Invalid Login details" );
+                String jsonString = JsonUtil.buildJsonString(myMap);
+                response.getWriter().write(jsonString);
             }
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
-
     }
 
     private String getJwt(HttpServletRequest request) {
