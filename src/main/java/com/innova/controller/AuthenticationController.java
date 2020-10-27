@@ -5,6 +5,7 @@ import com.innova.event.OnPasswordForgotEvent;
 import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.AccountNotActivatedException;
 import com.innova.exception.ErrorWhileSendingEmailException;
+import com.innova.model.ActiveSessions;
 import com.innova.model.Attempt;
 import com.innova.model.Role;
 import com.innova.model.Roles;
@@ -13,6 +14,7 @@ import com.innova.message.request.ForgotPasswordForm;
 import com.innova.message.request.LoginForm;
 import com.innova.message.request.SignUpForm;
 import com.innova.message.response.LoginResponse;
+import com.innova.repository.ActiveSessionsRepository;
 import com.innova.repository.AttemptRepository;
 import com.innova.repository.RoleRepository;
 import com.innova.repository.UserRepository;
@@ -35,6 +37,8 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +56,9 @@ public class AuthenticationController {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    ActiveSessionsRepository activeSessionsRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -102,6 +109,24 @@ public class AuthenticationController {
             attempt.setAttemptCounter(0);
             attemptRepository.save(attempt);
         }
+
+        String userAgent = request.getHeader("User-Agent") == null ? "Not known" : request.getHeader("User-Agent");
+
+        ActiveSessions activeSession = new ActiveSessions(
+            refreshToken,
+            userAgent,
+            LocalDateTime.ofInstant(jwtProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
+            LocalDateTime.ofInstant(jwtProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
+        );
+
+        activeSession.setUser(user);
+         
+        System.out.println(jwtProvider.getExpiredDateFromJwt(refreshToken, "refresh"));
+        System.out.println(jwtProvider.getIssueDateFromJwt(refreshToken, "refresh"));
+        
+
+        activeSessionsRepository.save(activeSession);
+
         return ResponseEntity.ok(new LoginResponse(accessToken,
                 refreshToken,
                 userDetails.getId(),
@@ -230,3 +255,9 @@ public class AuthenticationController {
         }
     }
 }
+
+
+/**
+ *  "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJrcm10cmsyMEBnbWFpbC5jb20iLCJpYXQiOjE2MDM3ODUyMTQsImV4cCI6MTYwMzc4NzAxNH0.KMAR1bnZnjdpd6Rl0MIxTs0pSXTCdnQefphMkOLJ_Sxw3gh0sFeUSIWt0UqDtgEwikdyp6r-fMz-jlzNcjKzoA",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJrcm10cmsyMEBnbWFpbC5jb20iLCJpYXQiOjE2MDM3ODUyMTQsImV4cCI6MTYwNjM3NzIxNH0.y6MeViZDtBohalBIMHHt9NQAtf3JUadOtd4V-iugEMxxQo5hahw9I_tijYg94f0mYfgynYhZdw7TJihXa_wR2w",
+ */
