@@ -100,6 +100,22 @@ public class JwtProvider {
 
     }
 
+    public Date getExpiredDateFromJwt(String token, String matter) {
+        String secret = getSecret(matter);
+        return Jwts.parser()
+            .setSigningKey(secret)
+            .parseClaimsJws(token)
+            .getBody().getExpiration();
+    }
+
+    public Date getIssueDateFromJwt(String token, String matter) {
+        String secret = getSecret(matter);
+        return Jwts.parser()
+            .setSigningKey(secret)
+            .parseClaimsJws(token)
+            .getBody().getIssuedAt();
+    }
+
     public boolean validateJwtToken(String authToken, String matter, HttpServletRequest request) throws AccessTokenExpiredException {
         String secret = getSecret(matter);
         try {
