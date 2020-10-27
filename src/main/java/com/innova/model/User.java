@@ -5,6 +5,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -57,12 +60,24 @@ public class User {
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<Role>();
 
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference
+    private Set<ActiveSessions> activeSessions = new HashSet<>();;
+
     public User() {
 
     }
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Set<ActiveSessions> getActiveSessions(){
+        return this.activeSessions;
+    }
+
+    public void setActiveSessions(Set<ActiveSessions> activeSessions){
+        this.activeSessions = activeSessions;
     }
 
     public Set<Role> getRoles() {
