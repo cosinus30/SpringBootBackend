@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/changes/templateData5.sql
   - include:
       file: db/changelog/changes/v0005.sql
+  - include:
+      file: db/changelog/changes/activeSessions2.sql
