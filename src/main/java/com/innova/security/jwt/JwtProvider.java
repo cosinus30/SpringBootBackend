@@ -68,8 +68,11 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String generateRefreshToken(Authentication authentication) {
+    public String generateRefreshToken(Authentication authentication, boolean rememberMe) {
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
+        if(rememberMe){
+            this.jwtRefreshTokenExpiration="31104000000"; //1 year
+        }
         return Jwts.builder()
                 .setSubject((userPrincipal.getEmail()))
                 .setIssuedAt(new Date())

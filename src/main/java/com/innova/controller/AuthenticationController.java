@@ -100,7 +100,7 @@ public class AuthenticationController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String accessToken = jwtProvider.generateJwtToken(userPrincipal);
-        String refreshToken = jwtProvider.generateRefreshToken(authentication);
+        String refreshToken = jwtProvider.generateRefreshToken(authentication, loginForm.isRememberMe());
 
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
