@@ -4,7 +4,9 @@ package com.innova.controller;
 import com.innova.message.request.ChangePasswordForm;
 import com.innova.message.request.ForgotAndChangePasswordForm;
 import com.innova.message.request.LogoutForm;
+import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.BadRequestException;
+import com.innova.exception.ErrorWhileSendingEmailException;
 import com.innova.message.request.ChangeForm;
 import com.innova.model.ActiveSessions;
 import com.innova.model.TokenBlacklist;
@@ -15,6 +17,7 @@ import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -50,6 +53,10 @@ public class UserController {
     @Autowired
     JwtProvider jwtProvider;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+
     @GetMapping("/")
     public ResponseEntity<?> getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -68,15 +75,19 @@ public class UserController {
         if (authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
             UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
 
-            User user = userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
-            if (changeForm.getEmail() != null || changeForm.getAge() != null || changeForm.getName() != null
-                    || changeForm.getLastname() != null || changeForm.getPhoneNumber() != null) {
+            User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
+            if (changeForm.getEmail() != null || changeForm.getAge() != null || changeForm.getName() != null || changeForm.getLastname() != null || changeForm.getPhoneNumber() != null) {
                 if (changeForm.getEmail() != null) {
                     if (userRepository.existsByEmail(changeForm.getEmail())) {
                         return new ResponseEntity<String>("Email is already in use!", HttpStatus.BAD_REQUEST);
                     }
                     user.setEmail(changeForm.getEmail());
+                    user.setEnabled(false);
+                    try {
+                        eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
+                    } catch (Exception re) {
+                        throw new ErrorWhileSendingEmailException(re.getMessage());
+                    }
                 }
                 if (changeForm.getName() != null)
                     user.setName(changeForm.getName());
@@ -84,19 +95,20 @@ public class UserController {
                     user.setLastname(changeForm.getLastname());
                 if (changeForm.getAge() != null)
                     user.setAge(changeForm.getAge());
-                if (changeForm.getPhoneNumber() != null)
-                    user.setPhoneNumber(changeForm.getPhoneNumber());
-
+                if (changeForm.getPhoneNumber() != null) {
+                    if (changeForm.getPhoneNumber().length() == 10)
+                        user.setPhoneNumber(changeForm.getPhoneNumber());
+                    else
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("Size of phone Number need to be equal 10"));
+                }
                 userRepository.save(user);
 
-                return ResponseEntity.ok(Arrays.asList(user.toString()));
+                return ResponseEntity.ok(Arrays.asList("User details successfuly changed."));
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Arrays.asList("You are not changing anything."));
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Arrays.asList("You are not changing anything."));
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Arrays.asList("Please sign in for retrieving user information."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Arrays.asList("Please sign in for retrieving user information."));
         }
     }
 
