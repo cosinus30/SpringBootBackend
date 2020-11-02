@@ -2,6 +2,10 @@ package com.innova.security.oauth2;
 
 import com.innova.config.AppProperties;
 import com.innova.exception.BadRequestException;
+import com.innova.model.ActiveSessions;
+import com.innova.model.User;
+import com.innova.repository.ActiveSessionsRepository;
+import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import com.innova.util.CookieUtils;
@@ -17,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import static com.innova.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
@@ -30,6 +36,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     @Autowired
     private AppProperties appProperties;
+
+    @Autowired
+    ActiveSessionsRepository activeSessionsRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     OAuth2AuthenticationSuccessHandler(JwtProvider tokenProvider,
@@ -60,10 +72,24 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             throw new BadRequestException("Sorry! We've got an Unauthorized Redirect URI and can't proceed with the authentication");
         }
 
+        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
+
+        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
         String refreshToken = tokenProvider.generateRefreshToken(authentication,false);
         String accessToken = tokenProvider.generateJwtToken((UserDetailImpl) authentication.getPrincipal());
+
+        String userAgent = request.getHeader("User-Agent") == null ? "Not known" : request.getHeader("User-Agent");
+
+        ActiveSessions activeSession = new ActiveSessions(
+            refreshToken,
+            userAgent,
+            LocalDateTime.ofInstant(tokenProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
+            LocalDateTime.ofInstant(tokenProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
+        );
+        activeSession.setUser(user);
+        activeSessionsRepository.save(activeSession);
 
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("refreshToken", refreshToken)
