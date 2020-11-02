@@ -83,6 +83,10 @@ public class UserController {
                     if (userRepository.existsByEmail(changeForm.getEmail())) {
                         return new ResponseEntity<String>("Email is already in use!", HttpStatus.BAD_REQUEST);
                     }
+                    Set<ActiveSessions> activeSessionsForUserWithCurrentEmail = user.getActiveSessions();
+                    for(ActiveSessions activeSession : activeSessionsForUserWithCurrentEmail){
+                        activeSessionsRepository.deleteById(activeSession.getRefreshToken());
+                    }
                     user.setEmail(changeForm.getEmail());
                     user.setEnabled(false);
                     try {
