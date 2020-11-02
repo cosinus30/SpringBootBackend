@@ -25,8 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @ControllerAdvice
 public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
@@ -127,11 +126,12 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler({AccountNotActivatedException.class})
     public ResponseEntity<Object> handleAccountNotActivatedException(final AccountNotActivatedException ex) {
         logger.info(ex.getClass().getName());
-
-        final String error = "Hey, you! Stop right there. Activation required.";
-
-        ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, ex.getLocalizedMessage(), error);
-        return new ResponseEntity<>(apiError, apiError.getStatus());
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/signin");
+        myMap.put("status", HttpStatus.UNAUTHORIZED.value());
+        myMap.put("error", "Account not activated. Please activate your account!");
+        return new ResponseEntity<>(myMap, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler({AccessTokenExpiredException.class})
