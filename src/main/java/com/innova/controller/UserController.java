@@ -16,6 +16,8 @@ import com.innova.repository.TokenBlacklistRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
+import com.innova.util.PasswordUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -161,6 +163,11 @@ public class UserController {
                     return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
                 }
                 else if(changePasswordForm.getNewPassword().equals(changePasswordForm.getNewPasswordConfirmation())){
+                    if (!PasswordUtil.isValidPassword(changePasswordForm.getNewPassword())){
+                        myMap.put("status", HttpStatus.BAD_REQUEST.value());
+                        myMap.put("error", "Password is not valid. It should have at least one uppercase, lowercase letter, number. Min length is 6");
+                        return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
+                    }
                     user.setPassword(passwordEncoder.encode(changePasswordForm.getNewPassword()));
                     userRepository.save(user);
                     myMap.put("message", "Password successfully changed");

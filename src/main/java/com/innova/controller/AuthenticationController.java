@@ -21,6 +21,8 @@ import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 
 import com.innova.security.services.UserDetailImpl;
+import com.innova.util.PasswordUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -146,12 +148,17 @@ public class AuthenticationController {
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             myMap.put("error", "Username is already taken!");
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
-
         }
 
         if (userRepository.existsByEmail(signUpForm.getEmail())) {
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             myMap.put("error", "Email is already in use!");
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
+        }
+
+        if (!PasswordUtil.isValidPassword(signUpForm.getPassword())){
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            myMap.put("error", "Password is not valid. It should have at least one uppercase, lowercase letter, number. Min length is 6");
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
 
