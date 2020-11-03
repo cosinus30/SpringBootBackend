@@ -32,6 +32,7 @@ import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -243,7 +244,7 @@ public class UserController {
         if (authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
             UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
             User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
-
+            
             Set<ActiveSessions> activeSessionsForUser = user.getActiveSessions();
             return ResponseEntity.ok().body(activeSessionsForUser);
         }
@@ -255,7 +256,7 @@ public class UserController {
     }
 
     @DeleteMapping("/logout-from-session")
-    public ResponseEntity<?> logoutFromSession(@RequestParam("token")String refreshToken, HttpServletRequest request){
+    public ResponseEntity<?> logoutFromSession(@RequestParam("token")String refreshToken,@RequestParam("accessToken") String accessToken, HttpServletRequest request){
         Map<String, Object> myMap = new HashMap<>();
         myMap.put("timestamp", new Date());
         myMap.put("path", "api/auth/active-sessions");
@@ -268,7 +269,9 @@ public class UserController {
                     myMap.put("message", "Successfully logged out from " + refreshToken);
                     myMap.put("status", HttpStatus.OK.value());
                     TokenBlacklist oldRefreshToken = new TokenBlacklist(refreshToken, "refresh token");
+                    TokenBlacklist oldAccessToken = new TokenBlacklist(refreshToken, "access token");
                     tokenBlacklistRepository.save(oldRefreshToken);
+                    tokenBlacklistRepository.save(oldAccessToken);
                     return ResponseEntity.ok().body(myMap);
                 }
                 else{
