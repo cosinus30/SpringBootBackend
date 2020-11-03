@@ -117,6 +117,7 @@ public class AuthenticationController {
 
         ActiveSessions activeSession = new ActiveSessions(
                 refreshToken,
+                accessToken,
                 userAgent,
                 LocalDateTime.ofInstant(jwtProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
                 LocalDateTime.ofInstant(jwtProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
@@ -223,6 +224,9 @@ public class AuthenticationController {
             if (jwtProvider.validateJwtToken(token, "refresh", request)) {
                 Map<String, Object> response = new HashMap<>();
                 String newAccessToken = jwtProvider.generateJwtToken(userPrincipal);
+                ActiveSessions currentSession = activeSessionsRepository.getOne(token);
+                currentSession.getAccessToken(newAccessToken);
+                activeSessionsRepository.save(currentSession);
                 response.put("accessToken", newAccessToken);
                 return ResponseEntity.ok(response);
             } else {

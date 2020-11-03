@@ -20,6 +20,9 @@ public class ActiveSessions {
     @Column(name = "refresh_token")
     private String refreshToken;
 
+    @Column(name = "access_token")
+    private String accessToken;
+
     @Column(name="user_agent")
     private String userAgent;
 
@@ -38,11 +41,20 @@ public class ActiveSessions {
 
     }
 
-    public ActiveSessions(String refreshToken, String userAgent, LocalDateTime expireDate, LocalDateTime issueDate){
+    public ActiveSessions(String refreshToken, String accessToken, String userAgent, LocalDateTime expireDate, LocalDateTime issueDate){
         this.refreshToken = refreshToken;
+        this.accessToken = accessToken;
         this.userAgent = userAgent;
         this.expireDate = expireDate;
         this.issueDate = issueDate;
+    }
+
+    public String getAccessToken(){
+        return this.accessToken;
+    }
+
+    public void getAccessToken(String accessToken){
+        this.accessToken = accessToken;
     }
 
     public String getRefreshToken(){
