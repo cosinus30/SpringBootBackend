@@ -23,6 +23,7 @@ import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import com.innova.util.PasswordUtil;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -216,26 +217,31 @@ public class AuthenticationController {
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
-
-        String email = jwtProvider.getSubjectFromJwt(token, "refresh");
-        System.out.println(email);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Fail! -> Cause: Email not found."));
-        if (!user.isEnabled()) {
-            throw new AccountNotActivatedException("Account has not been activated.");
-        }
-        UserDetailImpl userPrincipal = UserDetailImpl.build(user);
-
-        if(jwtProvider.validateJwtToken(token, "refresh", request)){
-            Map<String, Object> response = new HashMap<>();
-            String newAccessToken = jwtProvider.generateJwtToken(userPrincipal);
-            response.put("accessToken", newAccessToken);
-            return ResponseEntity.ok(response);
-        }
-        else{
-            myMap.put("error", "Invalid refresh token");
+        try {
+            String email = jwtProvider.getSubjectFromJwt(token, "refresh");
+            System.out.println(email);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Fail! -> Cause: Email not found."));
+            if (!user.isEnabled()) {
+                throw new AccountNotActivatedException("Account has not been activated.");
+            }
+            UserDetailImpl userPrincipal = UserDetailImpl.build(user);
+            if(jwtProvider.validateJwtToken(token, "refresh", request)){
+                Map<String, Object> response = new HashMap<>();
+                String newAccessToken = jwtProvider.generateJwtToken(userPrincipal);
+                response.put("accessToken", newAccessToken);
+                return ResponseEntity.ok(response);
+            }
+            else{
+                myMap.put("error", "Invalid refresh token");
+                myMap.put("status", HttpStatus.UNAUTHORIZED.value());
+                return new ResponseEntity<>(myMap, HttpStatus.UNAUTHORIZED);
+            }
+        }catch(ExpiredJwtException e){
+            myMap.put("error", "Refresh token expired.");
             myMap.put("status", HttpStatus.UNAUTHORIZED.value());
-            return new ResponseEntity<>(myMap, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
+
     }
 
     @PostMapping("forgot-password")
