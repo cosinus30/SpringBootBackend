@@ -196,12 +196,12 @@ public class AuthenticationController {
             userRepository.save(user);
 
             return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                    .location(URI.create("http://localhost:4200"))
+                    .location(URI.create("http://localhost:4200/mailsuccess"))
                     .build();
         } else {
             // Token is not valid
             return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                    .location(URI.create("http://localhost:4200"))
+                    .location(URI.create("http://localhost:4200/mailerror"))
                     .build();
         }
     }
@@ -261,10 +261,25 @@ public class AuthenticationController {
             }
         }
     }
+
+    @GetMapping("send-email")
+    public ResponseEntity<?> sendNewEmail(@RequestParam("email") String email){
+        Map<String, Object> myMap = new HashMap<>();
+        myMap.put("timestamp", new Date());
+        myMap.put("path", "api/auth/send-email");
+        try {
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Fail! -> Cause: Email not found"));
+            eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
+            myMap.put("message", "Email successfuly sent.");
+            myMap.put("status", HttpStatus.OK.value());
+            return new ResponseEntity<>(myMap, HttpStatus.OK);
+        }catch(RuntimeException e){
+            myMap.put("error", "No such user");
+            myMap.put("status", HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
+        } 
+        catch (Exception re) {
+            throw new ErrorWhileSendingEmailException(re.getMessage());
+        }
+    }
 }
-
-
-/**
- *  "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJrcm10cmsyMEBnbWFpbC5jb20iLCJpYXQiOjE2MDM3ODUyMTQsImV4cCI6MTYwMzc4NzAxNH0.KMAR1bnZnjdpd6Rl0MIxTs0pSXTCdnQefphMkOLJ_Sxw3gh0sFeUSIWt0UqDtgEwikdyp6r-fMz-jlzNcjKzoA",
-    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJrcm10cmsyMEBnbWFpbC5jb20iLCJpYXQiOjE2MDM3ODUyMTQsImV4cCI6MTYwNjM3NzIxNH0.y6MeViZDtBohalBIMHHt9NQAtf3JUadOtd4V-iugEMxxQo5hahw9I_tijYg94f0mYfgynYhZdw7TJihXa_wR2w",
- */
