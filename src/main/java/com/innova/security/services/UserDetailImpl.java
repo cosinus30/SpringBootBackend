@@ -136,9 +136,7 @@ public class UserDetailImpl implements UserDetails, OAuth2User {
     }
 
     @Override
-    public String getName() {
-        return String.valueOf(name);
-    }
+    public String getName() { return this.name; }
 
     public void setId(Integer id) {
         this.id = id;
