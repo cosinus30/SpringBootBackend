@@ -47,10 +47,10 @@ public class JwtProvider {
     private String jwtPasswordTokenExpiration;
 
 
+    public JwtProvider() {
+    }
 
-    public JwtProvider(){}
-
-    public String generateJwtTokenForVerification(User user){
+    public String generateJwtTokenForVerification(User user) {
         return Jwts.builder()
                 .setSubject((user.getEmail()))
                 .setIssuedAt(new Date())
@@ -59,7 +59,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String generateJwtTokenForPassword(String email){
+    public String generateJwtTokenForPassword(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
@@ -70,8 +70,8 @@ public class JwtProvider {
 
     public String generateRefreshToken(Authentication authentication, boolean rememberMe) {
         UserDetailImpl userPrincipal = (UserDetailImpl) authentication.getPrincipal();
-        if(rememberMe){
-            this.jwtRefreshTokenExpiration="31104000000"; //1 year
+        if (rememberMe) {
+            this.jwtRefreshTokenExpiration = "31104000000"; //1 year
         }
         return Jwts.builder()
                 .setSubject((userPrincipal.getEmail()))
@@ -85,7 +85,6 @@ public class JwtProvider {
         Map<String, Object> claims = new HashMap<>();
 
 
-
         return Jwts.builder()
                 .setSubject(userPrincipal.getEmail())
                 .signWith(SignatureAlgorithm.HS512, jwtSecretForAccessToken)
@@ -97,32 +96,32 @@ public class JwtProvider {
     public String getSubjectFromJwt(String token, String matter) {
         String secret = getSecret(matter);
         return Jwts.parser()
-            .setSigningKey(secret)
-            .parseClaimsJws(token)
-            .getBody().getSubject();
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody().getSubject();
 
     }
 
     public Date getExpiredDateFromJwt(String token, String matter) {
         String secret = getSecret(matter);
         return Jwts.parser()
-            .setSigningKey(secret)
-            .parseClaimsJws(token)
-            .getBody().getExpiration();
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody().getExpiration();
     }
 
     public Date getIssueDateFromJwt(String token, String matter) {
         String secret = getSecret(matter);
         return Jwts.parser()
-            .setSigningKey(secret)
-            .parseClaimsJws(token)
-            .getBody().getIssuedAt();
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody().getIssuedAt();
     }
 
     public boolean validateJwtToken(String authToken, String matter, HttpServletRequest request) throws AccessTokenExpiredException {
         String secret = getSecret(matter);
         try {
-            if(!matter.equals("verification") && checkExistence(authToken)){
+            if (!matter.equals("verification") && checkExistence(authToken)) {
                 return false;
             }
             Jwts.parser().setSigningKey(secret).parseClaimsJws(authToken);
@@ -142,12 +141,12 @@ public class JwtProvider {
         return false;
     }
 
-    private boolean checkExistence(String token){
+    private boolean checkExistence(String token) {
         return tokenBlacklistRepository.existsByToken(token);
     }
 
-    private String getSecret(String matter){
-        switch (matter){
+    private String getSecret(String matter) {
+        switch (matter) {
             case "verification":
                 return jtwSecretForVerification;
             case "authorize":

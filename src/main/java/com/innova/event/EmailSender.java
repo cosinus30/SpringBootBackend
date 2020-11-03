@@ -20,8 +20,8 @@ public class EmailSender {
     public void sendSimpleMessage(String content, String to, String subject) throws MessagingException, IOException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message,
-                                            MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                                            StandardCharsets.UTF_8.name());
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
 
         helper.setTo(to);
         helper.setText(content, true);
@@ -29,5 +29,5 @@ public class EmailSender {
 
         javaMailSender.send(message);
     }
-    
+
 }

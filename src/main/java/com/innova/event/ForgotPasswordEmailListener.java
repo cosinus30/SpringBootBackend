@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
 @Component
-public class ForgotPasswordEmailListener implements ApplicationListener<OnPasswordForgotEvent>{
+public class ForgotPasswordEmailListener implements ApplicationListener<OnPasswordForgotEvent> {
     @Autowired
     JwtProvider jwtProvider;
 
@@ -39,7 +39,7 @@ public class ForgotPasswordEmailListener implements ApplicationListener<OnPasswo
         String token = jwtProvider.generateJwtTokenForPassword(email);
 
         String url = "http://localhost:4200" + "/resetpassword?token=" + token;
-        
+
         Map model = new HashMap();
         model.put("name", "Beloved user");
         model.put("url", url);
@@ -49,6 +49,6 @@ public class ForgotPasswordEmailListener implements ApplicationListener<OnPasswo
         context.setVariables(model);
         String content = templateEngine.process("db-forgotpassword_email", context);
 
-        emailSender.sendSimpleMessage(content , email, "Forgot password");
+        emailSender.sendSimpleMessage(content, email, "Forgot password");
     }
 }

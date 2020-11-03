@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -68,7 +69,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .map(Cookie::getValue);
 
 
-        if(redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
+        if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
             throw new BadRequestException("Sorry! We've got an Unauthorized Redirect URI and can't proceed with the authentication");
         }
 
@@ -77,16 +78,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
 
-        String refreshToken = tokenProvider.generateRefreshToken(authentication,false);
+        String refreshToken = tokenProvider.generateRefreshToken(authentication, false);
         String accessToken = tokenProvider.generateJwtToken((UserDetailImpl) authentication.getPrincipal());
 
         String userAgent = request.getHeader("User-Agent") == null ? "Not known" : request.getHeader("User-Agent");
 
         ActiveSessions activeSession = new ActiveSessions(
-            refreshToken,
-            userAgent,
-            LocalDateTime.ofInstant(tokenProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
-            LocalDateTime.ofInstant(tokenProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
+                refreshToken,
+                userAgent,
+                LocalDateTime.ofInstant(tokenProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
+                LocalDateTime.ofInstant(tokenProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
         );
         activeSession.setUser(user);
         activeSessionsRepository.save(activeSession);
@@ -108,7 +109,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .stream()
                 .anyMatch(authorizedRedirectUri -> {
                     URI authorizedURI = URI.create(authorizedRedirectUri);
-                    if(authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
+                    if (authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
                             && authorizedURI.getPort() == clientRedirectUri.getPort()) {
                         return true;
                     }

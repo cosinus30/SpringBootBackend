@@ -79,8 +79,8 @@ public class AuthenticationController {
         myMap.put("timestamp", new Date());
         myMap.put("path", "api/auth/signin");
 
-        if(loginForm.getPassword() == null || loginForm.getUsername() == null){
-            myMap.put("error","Username and password should be provided" );
+        if (loginForm.getPassword() == null || loginForm.getUsername() == null) {
+            myMap.put("error", "Username and password should be provided");
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
@@ -107,7 +107,7 @@ public class AuthenticationController {
 
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
-        if(attemptRepository.existsByIp(request.getRemoteAddr())) {
+        if (attemptRepository.existsByIp(request.getRemoteAddr())) {
             Attempt attempt = attemptRepository.findById(request.getRemoteAddr()).get();
             attempt.setAttemptCounter(0);
             attemptRepository.save(attempt);
@@ -116,17 +116,13 @@ public class AuthenticationController {
         String userAgent = request.getHeader("User-Agent") == null ? "Not known" : request.getHeader("User-Agent");
 
         ActiveSessions activeSession = new ActiveSessions(
-            refreshToken,
-            userAgent,
-            LocalDateTime.ofInstant(jwtProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
-            LocalDateTime.ofInstant(jwtProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
+                refreshToken,
+                userAgent,
+                LocalDateTime.ofInstant(jwtProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
+                LocalDateTime.ofInstant(jwtProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
         );
 
         activeSession.setUser(user);
-         
-        System.out.println(jwtProvider.getExpiredDateFromJwt(refreshToken, "refresh"));
-        System.out.println(jwtProvider.getIssueDateFromJwt(refreshToken, "refresh"));
-        
 
         activeSessionsRepository.save(activeSession);
 
@@ -157,7 +153,7 @@ public class AuthenticationController {
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
 
-        if (!PasswordUtil.isValidPassword(signUpForm.getPassword())){
+        if (!PasswordUtil.isValidPassword(signUpForm.getPassword())) {
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             myMap.put("error", "Password is not valid. It should have at least one uppercase, lowercase letter, number. Min length is 6");
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
@@ -208,35 +204,33 @@ public class AuthenticationController {
     }
 
     @GetMapping("/refresh-token")
-    public ResponseEntity<?> getAccessToken(@RequestParam("token") String token,  HttpServletRequest request){
+    public ResponseEntity<?> getAccessToken(@RequestParam("token") String token, HttpServletRequest request) {
         Map<String, Object> myMap = new HashMap<>();
         myMap.put("timestamp", new Date());
         myMap.put("path", "api/auth/refresh-token");
-        if(token == null){
+        if (token == null) {
             myMap.put("error", "Token cannot be empty");
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
         }
         try {
             String email = jwtProvider.getSubjectFromJwt(token, "refresh");
-            System.out.println(email);
             User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Fail! -> Cause: Email not found."));
             if (!user.isEnabled()) {
                 throw new AccountNotActivatedException("Account has not been activated.");
             }
             UserDetailImpl userPrincipal = UserDetailImpl.build(user);
-            if(jwtProvider.validateJwtToken(token, "refresh", request)){
+            if (jwtProvider.validateJwtToken(token, "refresh", request)) {
                 Map<String, Object> response = new HashMap<>();
                 String newAccessToken = jwtProvider.generateJwtToken(userPrincipal);
                 response.put("accessToken", newAccessToken);
                 return ResponseEntity.ok(response);
-            }
-            else{
+            } else {
                 myMap.put("error", "Invalid refresh token");
                 myMap.put("status", HttpStatus.UNAUTHORIZED.value());
                 return new ResponseEntity<>(myMap, HttpStatus.UNAUTHORIZED);
             }
-        }catch(ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             myMap.put("error", "Refresh token expired.");
             myMap.put("status", HttpStatus.UNAUTHORIZED.value());
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
@@ -245,18 +239,17 @@ public class AuthenticationController {
     }
 
     @PostMapping("forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordForm forgotPasswordForm){
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordForm forgotPasswordForm) {
         Map<String, Object> myMap = new HashMap<>();
         myMap.put("timestamp", new Date());
         myMap.put("path", "api/auth/forgot-password");
         String email = forgotPasswordForm.getEmail();
 
-        if(!userRepository.existsByEmail(email)){
+        if (!userRepository.existsByEmail(email)) {
             myMap.put("error", "No such user");
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
-        }
-        else{
+        } else {
             try {
                 eventPublisher.publishEvent(new OnPasswordForgotEvent(email));
                 myMap.put("message", "Email successfuly sent.");
@@ -269,7 +262,7 @@ public class AuthenticationController {
     }
 
     @GetMapping("send-email")
-    public ResponseEntity<?> sendNewEmail(@RequestParam("email") String email){
+    public ResponseEntity<?> sendNewEmail(@RequestParam("email") String email) {
         Map<String, Object> myMap = new HashMap<>();
         myMap.put("timestamp", new Date());
         myMap.put("path", "api/auth/send-email");
@@ -279,12 +272,11 @@ public class AuthenticationController {
             myMap.put("message", "Email successfuly sent.");
             myMap.put("status", HttpStatus.OK.value());
             return new ResponseEntity<>(myMap, HttpStatus.OK);
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             myMap.put("error", "No such user");
             myMap.put("status", HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
-        } 
-        catch (Exception re) {
+        } catch (Exception re) {
             throw new ErrorWhileSendingEmailException(re.getMessage());
         }
     }

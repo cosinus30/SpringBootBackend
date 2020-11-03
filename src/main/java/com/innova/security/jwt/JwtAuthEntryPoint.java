@@ -25,7 +25,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 
-
 @Component
 public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
@@ -46,10 +45,10 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
         myMap.put("timestamp", new Date());
         myMap.put("status", HttpStatus.UNAUTHORIZED.value());
         myMap.put("path", "api/auth");
-        if(jwt == null){
-            if(attemptRepository.existsByIp(request.getRemoteAddr())) {
+        if (jwt == null) {
+            if (attemptRepository.existsByIp(request.getRemoteAddr())) {
                 Optional<Attempt> optionalAttempt = attemptRepository.findById(request.getRemoteAddr());
-                Attempt attempt=optionalAttempt.get();
+                Attempt attempt = optionalAttempt.get();
                 long hour = ChronoUnit.HOURS.between(attempt.getFirst_attempt_date(), LocalDateTime.now());
 
                 if (hour >= 24) {
@@ -67,16 +66,14 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             String jsonString = JsonUtil.buildJsonString(myMap);
             response.getWriter().write(jsonString);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        }
-        else{
+        } else {
             final String expired = (String) request.getAttribute("expired");
-            if (expired != null){
+            if (expired != null) {
                 myMap.put("error", "JWT Expired.");
                 String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
-            }
-            else{
-                myMap.put("error", "Invalid Login details" );
+            } else {
+                myMap.put("error", "Invalid Login details");
                 String jsonString = JsonUtil.buildJsonString(myMap);
                 response.getWriter().write(jsonString);
             }
@@ -88,7 +85,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.replace("Bearer ","");
+            return authHeader.replace("Bearer ", "");
         }
 
         return null;

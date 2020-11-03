@@ -47,14 +47,13 @@ class OAuth2UserService extends DefaultOAuth2UserService {
 
     private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());
-        if(StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
+        if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {
             throw new RuntimeException("Email not found from OAuth2 provider");
         }
         User user;
-        if(userRepository.existsByEmail(oAuth2UserInfo.getEmail())) {
+        if (userRepository.existsByEmail(oAuth2UserInfo.getEmail())) {
             user = userRepository.findByEmail(oAuth2UserInfo.getEmail()).orElseThrow(() -> new RuntimeException("Fail! -> Cause: User with given email could not be found!"));
-        }
-        else{
+        } else {
             user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
         }
         return UserDetailImpl.build(user, oAuth2User.getAttributes());

@@ -22,7 +22,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
-
 public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -43,7 +42,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException, AccessTokenExpiredException {
 
-        if(!attemptRepository.existsByIp(request.getRemoteAddr())) {
+        if (!attemptRepository.existsByIp(request.getRemoteAddr())) {
             Attempt attempt = new Attempt(request.getRemoteAddr(), 0, LocalDateTime.now());
             attemptRepository.save(attempt);
         }
@@ -60,8 +59,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Can NOT set user authentication -> Message: {}", e);
         }
         filterChain.doFilter(request, response);
@@ -71,7 +69,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.replace("Bearer ","");
+            return authHeader.replace("Bearer ", "");
         }
 
         return null;
@@ -80,7 +78,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
     private String getRefreshToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authentication");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.replace("Bearer ","");
+            return authHeader.replace("Bearer ", "");
         }
         return null;
     }
