@@ -83,14 +83,14 @@ public class AuthenticationController {
 
         if (loginForm.getPassword() == null || loginForm.getUsername() == null) {
             throw new BadRequestException("Username and password should be provided",
-                    ErrorCodes.USERNAME_AND_PASSWORD.getValue());
+                    ErrorCodes.USERNAME_AND_PASSWORD);
         }
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword()));
 
         User user = userRepository.findByUsername(loginForm.getUsername())
-                .orElseThrow(() -> new BadRequestException("User with given username could not found", ErrorCodes.NO_SUCH_USER.getValue()));
+                .orElseThrow(() -> new BadRequestException("User with given username could not found", ErrorCodes.NO_SUCH_USER));
 
         if (!user.isEnabled()) {
             throw new AccountNotActivatedException("Account has not been activated.");
@@ -128,18 +128,15 @@ public class AuthenticationController {
 
     @PostMapping("sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpForm) {
-        Map<String, Object> myMap = new HashMap<>();
-        myMap.put("timestamp", new Date());
-        myMap.put("path", "api/auth/sign-up");
         if (userRepository.existsByUsername(signUpForm.getUsername())) {
-            throw new BadRequestException("Username is already taken!", ErrorCodes.USERNAME_ALREADY_TAKEN.getValue());
+            throw new BadRequestException("Username is already taken!", ErrorCodes.USERNAME_ALREADY_TAKEN);
         }
         if (userRepository.existsByEmail(signUpForm.getEmail())) {
-            throw new BadRequestException("Email is already in use!", ErrorCodes.EMAIL_ALREADY_TAKEN.getValue());
+            throw new BadRequestException("Email is already in use!", ErrorCodes.EMAIL_ALREADY_TAKEN);
         }
 
         if (!PasswordUtil.isValidPassword(signUpForm.getPassword())) {
-            throw new BadRequestException("Password is not valid", ErrorCodes.PASSWORD_NOT_VALID.getValue());
+            throw new BadRequestException("Password is not valid", ErrorCodes.PASSWORD_NOT_VALID);
         }
 
         User user = new User(signUpForm.getUsername(), signUpForm.getEmail(),
@@ -156,30 +153,27 @@ public class AuthenticationController {
         } catch (Exception re) {
             throw new ErrorWhileSendingEmailException(re.getMessage());
         }
-        myMap.put("status", HttpStatus.CREATED.value());
-        myMap.put("message", "User registered successfully!");
-        return new ResponseEntity<>(myMap, HttpStatus.CREATED);
+        SuccessResponse response = new SuccessResponse(HttpStatus.CREATED, "User registered successfully");
+        return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
     }
 
     @GetMapping("/confirmRegistration")
     public ResponseEntity<?> confirmRegistration(@RequestParam("token") String token, HttpServletRequest request)
             throws URISyntaxException {
         if (token == null) {
-            // Token is empty redirect to error or something
             return ResponseEntity.status(HttpStatus.SEE_OTHER).location(URI.create("http://localhost:4200")).build();
         }
 
         if (token != null && jwtProvider.validateJwtToken(token, "verification", request)) {
             String username = jwtProvider.getSubjectFromJwt(token, "verification");
             User user = userRepository.findByEmail(username)
-                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER.getValue()));
+                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
             user.setEnabled(true);
             userRepository.save(user);
 
             return ResponseEntity.status(HttpStatus.SEE_OTHER).location(URI.create("http://localhost:4200/mailsuccess"))
                     .build();
         } else {
-            // Token is not valid
             return ResponseEntity.status(HttpStatus.SEE_OTHER).location(URI.create("http://localhost:4200/mailerror"))
                     .build();
         }
@@ -191,12 +185,12 @@ public class AuthenticationController {
         myMap.put("timestamp", new Date());
         myMap.put("path", "api/auth/refresh-token");
         if (token == null) {
-            throw new BadRequestException("Token cannot be empty", ErrorCodes.TOKEN_CANNOT_BE_EMPTY.getValue());
+            throw new BadRequestException("Token cannot be empty", ErrorCodes.TOKEN_CANNOT_BE_EMPTY);
         }
         try {
             String email = jwtProvider.getSubjectFromJwt(token, "refresh");
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER.getValue()));
+                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
             if (!user.isEnabled()) {
                 throw new AccountNotActivatedException("Account has not been activated.");
             }
@@ -226,7 +220,7 @@ public class AuthenticationController {
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordForm forgotPasswordForm) {
         String email = forgotPasswordForm.getEmail();
         if (!userRepository.existsByEmail(email)) {
-            throw new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER.getValue());
+            throw new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER);
         } else {
             try {
                 eventPublisher.publishEvent(new OnPasswordForgotEvent(email));
@@ -242,7 +236,7 @@ public class AuthenticationController {
     public ResponseEntity<?> sendNewEmail(@RequestParam("email") String email) {
         try {
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER.getValue()));
+                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
             eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
             SuccessResponse response = new SuccessResponse(HttpStatus.OK,"Email successfuly sent");
             return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());

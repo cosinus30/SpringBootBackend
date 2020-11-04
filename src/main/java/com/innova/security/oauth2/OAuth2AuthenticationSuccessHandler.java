@@ -1,6 +1,7 @@
 package com.innova.security.oauth2;
 
 import com.innova.config.AppProperties;
+import com.innova.constants.ErrorCodes;
 import com.innova.exception.BadRequestException;
 import com.innova.model.ActiveSessions;
 import com.innova.model.User;
@@ -70,7 +71,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
         if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
-            throw new BadRequestException("Unauthorized url", 1000);
+            throw new BadRequestException("Unauthorized url", ErrorCodes.USERNAME_AND_PASSWORD);
         }
 
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();

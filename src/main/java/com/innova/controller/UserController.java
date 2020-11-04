@@ -33,9 +33,7 @@ import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -208,7 +206,7 @@ public class UserController {
             String token = forgotAndChangePasswordForm.getToken();
             if(token!= null && jwtProvider.validateJwtToken(token,"password",request)){
                 String email = jwtProvider.getSubjectFromJwt(token, "password");
-                User user = userRepository.findByEmail(email).orElseThrow(() -> new BadRequestException("No such user", ErrorCodes.NO_SUCH_USER.getValue()));
+                User user = userRepository.findByEmail(email).orElseThrow(() -> new BadRequestException("No such user", ErrorCodes.NO_SUCH_USER));
                 if(!forgotAndChangePasswordForm.getNewPassword().equals(forgotAndChangePasswordForm.getNewPasswordConfirmation())){
                     myMap.put("error", "Password fields does not match");
                     myMap.put("status", HttpStatus.BAD_REQUEST.value());
@@ -270,7 +268,7 @@ public class UserController {
                     myMap.put("message", "Successfully logged out from " + refreshToken);
                     myMap.put("status", HttpStatus.OK.value());
                     TokenBlacklist oldRefreshToken = new TokenBlacklist(refreshToken, "refresh token");
-                    TokenBlacklist oldAccessToken = new TokenBlacklist(refreshToken, "access token");
+                    TokenBlacklist oldAccessToken = new TokenBlacklist(accessToken, "access token");
                     tokenBlacklistRepository.save(oldRefreshToken);
                     tokenBlacklistRepository.save(oldAccessToken);
                     return ResponseEntity.ok().body(myMap);
