@@ -1,4 +1,4 @@
-package com.innova.message.request;
+package com.innova.dto.request;
 
 import java.util.Set;
 

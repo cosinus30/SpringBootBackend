@@ -1,4 +1,4 @@
-package com.innova.message.request;
+package com.innova.dto.request;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;

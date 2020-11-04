@@ -1,4 +1,4 @@
-package com.innova.message.response;
+package com.innova.dto.response;
 
 import java.util.List;
 
