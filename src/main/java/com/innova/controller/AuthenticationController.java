@@ -12,6 +12,7 @@ import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.AccountNotActivatedException;
 import com.innova.exception.BadRequestException;
 import com.innova.exception.ErrorWhileSendingEmailException;
+import com.innova.exception.UnauthorizedException;
 import com.innova.model.ActiveSessions;
 import com.innova.model.Attempt;
 import com.innova.model.Role;
@@ -181,9 +182,6 @@ public class AuthenticationController {
 
     @GetMapping("/refresh-token")
     public ResponseEntity<?> getAccessToken(@RequestParam("token") String token, HttpServletRequest request) {
-        Map<String, Object> myMap = new HashMap<>();
-        myMap.put("timestamp", new Date());
-        myMap.put("path", "api/auth/refresh-token");
         if (token == null) {
             throw new BadRequestException("Token cannot be empty", ErrorCodes.TOKEN_CANNOT_BE_EMPTY);
         }
@@ -204,14 +202,10 @@ public class AuthenticationController {
                 response.put("accessToken", newAccessToken);
                 return ResponseEntity.ok(response);
             } else {
-                myMap.put("error", "Invalid refresh token");
-                myMap.put("status", HttpStatus.UNAUTHORIZED.value());
-                return new ResponseEntity<>(myMap, HttpStatus.UNAUTHORIZED);
+                throw new UnauthorizedException("Invalid refresh token", ErrorCodes.INVALID_REFRESH_TOKEN);
             }
         } catch (ExpiredJwtException e) {
-            myMap.put("error", "Refresh token expired.");
-            myMap.put("status", HttpStatus.UNAUTHORIZED.value());
-            return new ResponseEntity<>(myMap, HttpStatus.BAD_REQUEST);
+            throw new UnauthorizedException("Invalid refresh token", ErrorCodes.INVALID_REFRESH_TOKEN);
         }
 
     }
