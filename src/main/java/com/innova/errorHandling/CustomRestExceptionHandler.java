@@ -5,6 +5,8 @@ import com.innova.exception.AccountNotActivatedException;
 import com.innova.exception.BadRequestException;
 import com.innova.exception.CaptchaExpectedException;
 import com.innova.exception.ErrorWhileSendingEmailException;
+import com.innova.exception.UnauthorizedException;
+
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -122,12 +124,19 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    //401
-
+    //400
     @ExceptionHandler({BadRequestException.class})
     public ResponseEntity<Object> handleBadRequestException(final BadRequestException ex) {
         logger.info(ex.getClass().getName());
         final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getmessageCode(), ex.getMessage());
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
+    //401
+    @ExceptionHandler({UnauthorizedException.class})
+    public ResponseEntity<Object> handleUnauthorizedException(final UnauthorizedException ex) {
+        logger.info(ex.getClass().getName());
+        final ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, ex.getmessageCode(), ex.getMessage());
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
