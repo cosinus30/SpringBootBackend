@@ -119,9 +119,10 @@ public class AuthenticationController {
                         ZoneId.systemDefault()));
 
         activeSession.setUser(user);
-
         activeSessionsRepository.save(activeSession);
 
+        user.addActiveSession(activeSession);
+        userRepository.save(user);
         return ResponseEntity
                 .ok(new LoginResponse(accessToken, refreshToken, userDetails.getId(), userDetails.getUsername(),
                         userDetails.getEmail(), roles, userDetails.getName(), userDetails.getLastName()));

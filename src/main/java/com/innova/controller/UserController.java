@@ -18,6 +18,7 @@ import com.innova.repository.TokenBlacklistRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
+import com.innova.service.UserServiceImpl;
 import com.innova.util.PasswordUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +47,9 @@ public class UserController {
     UserRepository userRepository;
 
     @Autowired
+    UserServiceImpl userServiceImpl;
+
+    @Autowired
     TokenBlacklistRepository tokenBlacklistRepository;
 
     @Autowired
@@ -58,38 +63,37 @@ public class UserController {
 
     @GetMapping("/")
     public ResponseEntity<?> getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
+        UserDetailImpl userDetails = userServiceImpl
+                .getUserDetails(SecurityContextHolder.getContext().getAuthentication());
         return ResponseEntity.ok().body(userDetails);
     }
 
     @PutMapping("/edit")
+    @Transactional
     public ResponseEntity<?> editUser(@Valid @RequestBody ChangeForm changeForm) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
+        User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         if (changeForm.getEmail() != null && !changeForm.getEmail().equals(user.getEmail())) {
-            if (userRepository.existsByEmail(changeForm.getEmail())) {
+            if (userServiceImpl.existsByEmail(changeForm.getEmail())) {
                 return new ResponseEntity<String>("Email is already in use!", HttpStatus.BAD_REQUEST);
             }
             Set<ActiveSessions> activeSessionsForUserWithCurrentEmail = user.getActiveSessions();
+            user.setActiveSessions(null);
+            userRepository.save(user);
             for (ActiveSessions activeSession : activeSessionsForUserWithCurrentEmail) {
-                activeSessionsRepository.deleteById(activeSession.getRefreshToken());
+                if(activeSessionsRepository.existsById(activeSession.getRefreshToken())){
+                    activeSessionsRepository.delete(activeSession);
+                }
             }
-            user.setEmail(changeForm.getEmail());
-            user.setEnabled(false);
+            userServiceImpl.changeEmail(user, changeForm.getEmail());
+            System.out.println("I cannot reach here!");
             try {
                 eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
             } catch (Exception re) {
                 throw new ErrorWhileSendingEmailException(re.getMessage());
             }
         }
-        user.setName(changeForm.getName());
-        user.setLastname(changeForm.getLastname());
-        user.setAge(changeForm.getAge());
-        user.setPhoneNumber(changeForm.getPhoneNumber());
-        userRepository.save(user);
+        userServiceImpl.editUser(user, changeForm.getName(), changeForm.getLastname(), changeForm.getAge(),
+                changeForm.getPhoneNumber());
         SuccessResponse response = new SuccessResponse(HttpStatus.OK, "User details successfuly changed.");
         return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
     }
@@ -111,10 +115,7 @@ public class UserController {
 
     @PostMapping("/change-password")
     public ResponseEntity<?> createNewPassword(@RequestBody ChangePasswordForm changePasswordForm) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
+        User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         if (!changePasswordForm.checkAllFieldsAreGiven(changePasswordForm)) {
             throw new BadRequestException("All fields should be given", ErrorCodes.REQUIRE_ALL_FIELDS);
         } else {
@@ -127,8 +128,7 @@ public class UserController {
                 if (!PasswordUtil.isValidPassword(changePasswordForm.getNewPassword())) {
                     throw new BadRequestException("Password is not valid", ErrorCodes.PASSWORD_NOT_VALID);
                 }
-                user.setPassword(passwordEncoder.encode(changePasswordForm.getNewPassword()));
-                userRepository.save(user);
+                userServiceImpl.setNewPassword(user, changePasswordForm.getNewPassword());
                 SuccessResponse response = new SuccessResponse(HttpStatus.OK, "Password successfully changed");
                 return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
             } else {
@@ -146,19 +146,14 @@ public class UserController {
         } else {
             String token = forgotAndChangePasswordForm.getToken();
             if (token != null && jwtProvider.validateJwtToken(token, "password", request)) {
-                String email = jwtProvider.getSubjectFromJwt(token, "password");
-                User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new BadRequestException("No such user", ErrorCodes.NO_SUCH_USER));
+                User user = userServiceImpl.getUserByToken(token, "password");
                 if (!forgotAndChangePasswordForm.getNewPassword()
                         .equals(forgotAndChangePasswordForm.getNewPasswordConfirmation())) {
-
                     throw new BadRequestException("Password fields does not match",
                             ErrorCodes.NEW_PASSWORD_DOES_NOT_MATCH);
-
                 } else if (forgotAndChangePasswordForm.getNewPassword()
                         .equals(forgotAndChangePasswordForm.getNewPasswordConfirmation())) {
-                    user.setPassword(passwordEncoder.encode(forgotAndChangePasswordForm.getNewPassword()));
-                    userRepository.save(user);
+                    userServiceImpl.setNewPassword(user, forgotAndChangePasswordForm.getNewPassword());
                     SuccessResponse response = new SuccessResponse(HttpStatus.OK, "Password successfully changed");
                     return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
                 }
@@ -171,10 +166,7 @@ public class UserController {
 
     @GetMapping("/active-sessions")
     public ResponseEntity<?> getAllActiveSessions() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
-        User user = userRepository.findByEmail(userDetails.getEmail())
-                .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
+        User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Set<ActiveSessions> activeSessionsForUser = user.getActiveSessions();
         return ResponseEntity.ok().body(activeSessionsForUser);
     }

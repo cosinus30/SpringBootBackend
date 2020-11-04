@@ -72,6 +72,11 @@ public class User {
         this.id = id;
     }
 
+    public void addActiveSession(ActiveSessions activeSession){
+        activeSessions.add(activeSession);
+    }
+
+
     public Set<ActiveSessions> getActiveSessions(){
         return this.activeSessions;
     }
