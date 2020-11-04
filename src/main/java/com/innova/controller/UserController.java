@@ -1,13 +1,14 @@
 package com.innova.controller;
 
 
-import com.innova.message.request.ChangePasswordForm;
-import com.innova.message.request.ForgotAndChangePasswordForm;
-import com.innova.message.request.LogoutForm;
+import com.innova.constants.ErrorCodes;
+import com.innova.dto.request.ChangeForm;
+import com.innova.dto.request.ChangePasswordForm;
+import com.innova.dto.request.ForgotAndChangePasswordForm;
+import com.innova.dto.request.LogoutForm;
 import com.innova.event.OnRegistrationSuccessEvent;
 import com.innova.exception.BadRequestException;
 import com.innova.exception.ErrorWhileSendingEmailException;
-import com.innova.message.request.ChangeForm;
 import com.innova.model.ActiveSessions;
 import com.innova.model.TokenBlacklist;
 import com.innova.model.User;
@@ -207,7 +208,7 @@ public class UserController {
             String token = forgotAndChangePasswordForm.getToken();
             if(token!= null && jwtProvider.validateJwtToken(token,"password",request)){
                 String email = jwtProvider.getSubjectFromJwt(token, "password");
-                User user = userRepository.findByEmail(email).orElseThrow(() -> new BadRequestException("Fail! -> Cause: User not found."));
+                User user = userRepository.findByEmail(email).orElseThrow(() -> new BadRequestException("No such user", ErrorCodes.NO_SUCH_USER.getValue()));
                 if(!forgotAndChangePasswordForm.getNewPassword().equals(forgotAndChangePasswordForm.getNewPasswordConfirmation())){
                     myMap.put("error", "Password fields does not match");
                     myMap.put("status", HttpStatus.BAD_REQUEST.value());

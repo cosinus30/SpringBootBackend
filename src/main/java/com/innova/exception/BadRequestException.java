@@ -1,11 +1,14 @@
 package com.innova.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class BadRequestException extends RuntimeException {
-    public BadRequestException(String message) {
+
+    private int messageCode;
+
+    public BadRequestException(String message, int messageCode) {
         super(message);
+        this.messageCode = messageCode;
+    }
+
+    public int getmessageCode(){
+        return this.messageCode;
     }
 }

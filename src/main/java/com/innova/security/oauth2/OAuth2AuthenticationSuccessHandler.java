@@ -70,7 +70,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
         if (redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
-            throw new BadRequestException("Sorry! We've got an Unauthorized Redirect URI and can't proceed with the authentication");
+            throw new BadRequestException("Unauthorized url", 1000);
         }
 
         UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
@@ -85,6 +85,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         ActiveSessions activeSession = new ActiveSessions(
                 refreshToken,
+                accessToken,
                 userAgent,
                 LocalDateTime.ofInstant(tokenProvider.getExpiredDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault()),
                 LocalDateTime.ofInstant(tokenProvider.getIssueDateFromJwt(refreshToken, "refresh").toInstant(), ZoneId.systemDefault())
