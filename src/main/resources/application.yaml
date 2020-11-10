@@ -3,12 +3,12 @@ spring:
     banner-mode: off
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         jdbc:
           lob:
-            non_contextual_creation: true
+            non_contextual_creation: false
         id:
           new_generator_mappings: false
   datasource:
@@ -37,7 +37,7 @@ innova:
     jwtSecretForVerification: Iamhereforverification
     jwtSecretForRefreshToken: Youshallnotpass
     jtwSecretForPassword: Iamsoosecret
-    jwtAccessTokenExpiration: 1800000
+    jwtAccessTokenExpiration: 180000000000
     jwtRefreshTokenExpiration: 2592000000
     jwtVerificationTokenExpiration: 21600000
     jwtPasswordTokenExpiration: 1800000
