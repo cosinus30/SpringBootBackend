@@ -1,5 +1,6 @@
 package com.innova.dto.request;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
@@ -17,14 +18,19 @@ public class CreateArticleForm {
     @NotBlank
     private int readTime;
 
+    @NotBlank
+    @Max(50)
+    private String heading;
+
     public CreateArticleForm() {
     }
 
-    public CreateArticleForm(String content, boolean published, String contentType, int readTime) {
+    public CreateArticleForm(String content, boolean published, String contentType, int readTime, String heading) {
         this.content = content;
         this.published = published;
         this.contentType = contentType;
         this.readTime = readTime;
+        this.heading = heading;
     }
 
     public String getContent() {
@@ -57,5 +63,13 @@ public class CreateArticleForm {
 
     public void setReadTime(int readTime) {
         this.readTime = readTime;
+    }
+
+    public String getHeading() {
+        return this.heading;
+    }
+
+    public void setHeading(String heading) {
+        this.heading = heading;
     }
 }

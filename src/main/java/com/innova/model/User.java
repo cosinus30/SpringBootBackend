@@ -5,6 +5,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.HashSet;
@@ -35,6 +36,7 @@ public class User {
 
     @Size(min = 6, max = 20)
     @Column(name = "password")
+    @JsonIgnore
     private String password;
 
     @Size(min = 3, max = 25)
@@ -62,7 +64,7 @@ public class User {
     private Set<ActiveSessions> activeSessions = new HashSet<>();
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("author")
     private Set<Article> articles = new HashSet<>();;
 
     public User() {

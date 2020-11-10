@@ -4,14 +4,20 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.hibernate.annotations.Fetch;
 
 @Entity
 @Table(name = "articles", schema = "public")
@@ -33,24 +39,29 @@ public class Article {
     @Column(name = "content_type")
     private String contentType;
 
+    @Column(name = "heading")
+    @Max(50)
+    private String heading;
+
     @Column(name = "read_time")
     private int readTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties(value = { "activeSessions", "articles", "roles" })
     private User author;
 
     public Article() {
 
     }
 
-    public Article(String content, boolean published, String contentType, int readTime, User author) {
+    public Article(String content, boolean published, String contentType, int readTime, User author, String heading) {
         this.content = content;
         this.published = published;
         this.contentType = contentType;
         this.readTime = readTime;
         this.author = author;
+        this.heading = heading;
     }
 
     public Integer getArticleId() {
@@ -67,6 +78,14 @@ public class Article {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getHeading() {
+        return this.heading;
+    }
+
+    public void setHeading(String heading) {
+        this.heading = heading;
     }
 
     public boolean getPublished() {

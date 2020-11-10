@@ -1,6 +1,7 @@
 create table if not exists  "articles" (
     id serial primary key,
     content text NOT NULL,
+    heading text NOT NULL,
     published boolean NOT NULL default false,
     release_date timestamp without time zone NOT NULL,
     content_type text NOT NULL,

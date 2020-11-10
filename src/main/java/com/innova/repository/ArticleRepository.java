@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Integer> {
 
-    @Query(value = "SELECT article.* FROM articles article WHERE article.content_type = :contentType and article.published = false", nativeQuery = true)
+    @Query(value = "SELECT article.* FROM articles article WHERE article.content_type = :contentType and article.published = true", nativeQuery = true)
     List<Article> findArticlesByType(@Param("contentType") String contentType);
 
     @Query(value = "SELECT article.* FROM articles article WHERE article.author = :userId", nativeQuery = true)
