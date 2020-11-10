@@ -3,7 +3,6 @@ package com.innova.model;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -12,10 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "cloud_users", schema = "public",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"username"}),
-                @UniqueConstraint(columnNames = {"email"})})
+@Table(name = "cloud_users", schema = "public", uniqueConstraints = { @UniqueConstraint(columnNames = { "username" }),
+        @UniqueConstraint(columnNames = { "email" }) })
 public class User {
 
     @NotBlank
@@ -62,7 +59,11 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     @JsonManagedReference
-    private Set<ActiveSessions> activeSessions = new HashSet<>();;
+    private Set<ActiveSessions> activeSessions = new HashSet<>();
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<Article> articles = new HashSet<>();;
 
     public User() {
 
@@ -72,16 +73,23 @@ public class User {
         this.id = id;
     }
 
-    public void addActiveSession(ActiveSessions activeSession){
+    public void addArticle(Article article) {
+        articles.add(article);
+    }
+
+    public Set<Article> getArticles() {
+        return this.articles;
+    }
+
+    public void addActiveSession(ActiveSessions activeSession) {
         activeSessions.add(activeSession);
     }
 
-
-    public Set<ActiveSessions> getActiveSessions(){
+    public Set<ActiveSessions> getActiveSessions() {
         return this.activeSessions;
     }
 
-    public void setActiveSessions(Set<ActiveSessions> activeSessions){
+    public void setActiveSessions(Set<ActiveSessions> activeSessions) {
         this.activeSessions = activeSessions;
     }
 
@@ -98,7 +106,6 @@ public class User {
         this.email = email;
         this.password = password;
     }
-
 
     public String getUsername() {
         return username;
@@ -170,17 +177,8 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", enabled=" + enabled +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", name='" + name + '\'' +
-                ", lastname='" + lastname + '\'' +
-                ", age='" + age + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", roles=" + roles +
-                '}';
+        return "User{" + "id=" + id + ", username='" + username + '\'' + ", enabled=" + enabled + ", email='" + email
+                + '\'' + ", password='" + password + '\'' + ", name='" + name + '\'' + ", lastname='" + lastname + '\''
+                + ", age='" + age + '\'' + ", phoneNumber='" + phoneNumber + '\'' + ", roles=" + roles + '}';
     }
 }
