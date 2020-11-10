@@ -83,15 +83,14 @@ public class AuthenticationController {
             throws IOException, AccountNotActivatedException {
 
         if (loginForm.getPassword() == null || loginForm.getUsername() == null) {
-            throw new BadRequestException("Username and password should be provided",
-                    ErrorCodes.USERNAME_AND_PASSWORD);
+            throw new BadRequestException("Username and password should be provided", ErrorCodes.USERNAME_AND_PASSWORD);
         }
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginForm.getUsername(), loginForm.getPassword()));
 
-        User user = userRepository.findByUsername(loginForm.getUsername())
-                .orElseThrow(() -> new BadRequestException("User with given username could not found", ErrorCodes.NO_SUCH_USER));
+        User user = userRepository.findByUsername(loginForm.getUsername()).orElseThrow(
+                () -> new BadRequestException("User with given username could not found", ErrorCodes.NO_SUCH_USER));
 
         if (!user.isEnabled()) {
             throw new AccountNotActivatedException("Account has not been activated.");
@@ -168,8 +167,8 @@ public class AuthenticationController {
 
         if (token != null && jwtProvider.validateJwtToken(token, "verification", request)) {
             String username = jwtProvider.getSubjectFromJwt(token, "verification");
-            User user = userRepository.findByEmail(username)
-                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
+            User user = userRepository.findByEmail(username).orElseThrow(
+                    () -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
             user.setEnabled(true);
             userRepository.save(user);
 
@@ -188,8 +187,8 @@ public class AuthenticationController {
         }
         try {
             String email = jwtProvider.getSubjectFromJwt(token, "refresh");
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
+            User user = userRepository.findByEmail(email).orElseThrow(
+                    () -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
             if (!user.isEnabled()) {
                 throw new AccountNotActivatedException("Account has not been activated.");
             }
@@ -219,7 +218,7 @@ public class AuthenticationController {
         } else {
             try {
                 eventPublisher.publishEvent(new OnPasswordForgotEvent(email));
-                SuccessResponse response = new SuccessResponse(HttpStatus.OK,"Email successfuly sent");
+                SuccessResponse response = new SuccessResponse(HttpStatus.OK, "Email successfuly sent");
                 return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
             } catch (Exception re) {
                 throw new ErrorWhileSendingEmailException(re.getMessage());
@@ -230,12 +229,12 @@ public class AuthenticationController {
     @GetMapping("send-email")
     public ResponseEntity<?> sendNewEmail(@RequestParam("email") String email) {
         try {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
+            User user = userRepository.findByEmail(email).orElseThrow(
+                    () -> new BadRequestException("User with given email could not found", ErrorCodes.NO_SUCH_USER));
             eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
-            SuccessResponse response = new SuccessResponse(HttpStatus.OK,"Email successfuly sent");
+            SuccessResponse response = new SuccessResponse(HttpStatus.OK, "Email successfuly sent");
             return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
-        }catch (Exception re) {
+        } catch (Exception re) {
             throw new ErrorWhileSendingEmailException(re.getMessage());
         }
     }
