@@ -2,6 +2,7 @@ package com.innova.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import com.innova.model.Article;
 import com.innova.model.User;
@@ -40,7 +41,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (isPublished) {
             article.setReleaseDate(LocalDateTime.now());
         } else {
-            article.setReleaseDate(null);
+            article.setReleaseDate(LocalDateTime.now());
         }
         User user = article.getAuthor();
         user.addArticle(article);
@@ -54,18 +55,20 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Article getById(Integer id) {
-        Article article = articleRepository.getOne(id);
+    public Optional<Article> getById(Integer id) {
+        Optional<Article> article = articleRepository.findById(id);
         return article;
     }
 
     @Override
-    public Article updateArticle(Integer id, String content, String contentType, boolean published, int readTime) {
+    public Article updateArticle(Integer id, String content, String contentType, boolean published, int readTime,
+            String heading) {
         Article article = articleRepository.getOne(id);
         article.setContent(content);
         article.setContentType(contentType);
         article.setPublished(published);
         article.setReadTime(readTime);
+        article.setHeading(heading);
         if (published) {
             article.setReleaseDate(LocalDateTime.now());
         }
