@@ -11,6 +11,7 @@ import com.innova.exception.BadRequestException;
 import com.innova.exception.ErrorWhileSendingEmailException;
 import com.innova.exception.UnauthorizedException;
 import com.innova.model.ActiveSessions;
+import com.innova.model.Article;
 import com.innova.model.TokenBlacklist;
 import com.innova.model.User;
 import com.innova.repository.ActiveSessionsRepository;
@@ -18,6 +19,7 @@ import com.innova.repository.TokenBlacklistRepository;
 import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
+import com.innova.service.ArticleServiceImpl;
 import com.innova.service.UserServiceImpl;
 import com.innova.util.PasswordUtil;
 
@@ -34,6 +36,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -48,6 +52,9 @@ public class UserController {
 
     @Autowired
     UserServiceImpl userServiceImpl;
+
+    @Autowired
+    ArticleServiceImpl articleServiceImpl;
 
     @Autowired
     TokenBlacklistRepository tokenBlacklistRepository;
@@ -80,7 +87,7 @@ public class UserController {
             user.setActiveSessions(null);
             userRepository.save(user);
             for (ActiveSessions activeSession : activeSessionsForUserWithCurrentEmail) {
-                if(activeSessionsRepository.existsById(activeSession.getRefreshToken())){
+                if (activeSessionsRepository.existsById(activeSession.getRefreshToken())) {
                     activeSessionsRepository.delete(activeSession);
                 }
             }
@@ -190,6 +197,12 @@ public class UserController {
         } else {
             throw new BadRequestException("Token must be given", ErrorCodes.REQUIRE_ALL_FIELDS);
         }
+    }
 
+    @GetMapping("/articles")
+    public ResponseEntity<?> getAllArticlesOfUser() {
+        User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        List<Article> articles = articleServiceImpl.getAllArticlesByUserId(user.getId());
+        return ResponseEntity.ok().body(articles);
     }
 }
