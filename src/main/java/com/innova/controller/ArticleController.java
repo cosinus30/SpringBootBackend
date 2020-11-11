@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import com.innova.constants.ErrorCodes;
 import com.innova.dto.request.CreateArticleForm;
+import com.innova.dto.response.ArticleDetailResponse;
 import com.innova.dto.response.SuccessResponse;
 import com.innova.exception.BadRequestException;
 import com.innova.exception.UnauthorizedException;
@@ -50,15 +51,23 @@ public class ArticleController {
     @GetMapping("/tutorials")
     public ResponseEntity<?> getAllTutorials() {
         List<Article> tutorials = articleService.getAllTutorials();
-        System.out.println(tutorials);
         return ResponseEntity.ok().body(tutorials);
     }
 
+    // TODO look at multiple url mappings
     @GetMapping("/tutorials/{articleId}")
     public ResponseEntity<?> getTutorial(@PathVariable String articleId) {
+        User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Article tutorialDetail = articleService.getById(Integer.parseInt(articleId))
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
-        return ResponseEntity.ok().body(tutorialDetail);
+
+        if (user != null) {
+
+            boolean isUserLiked = likeService.isUserLiked(user, tutorialDetail);
+            boolean isBookmarked = false; // TODO add bookmark service
+            return ResponseEntity.ok().body(new ArticleDetailResponse(tutorialDetail, isUserLiked, isBookmarked));
+        }
+        return ResponseEntity.ok().body(new ArticleDetailResponse(tutorialDetail, false, false));
     }
 
     @GetMapping("/insights")
@@ -120,7 +129,7 @@ public class ArticleController {
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
         likeService.saveLike(user, article);
         // TODO return success response
-        return null;
+        return ResponseEntity.ok().body("WOHOOO");
     }
 
     @PostMapping("/{articleId}/unlike")
@@ -135,7 +144,6 @@ public class ArticleController {
             throw new BadRequestException("You have never liked that", ErrorCodes.NO_SUCH_USER);
         }
 
-        // TODO return success response
         return null;
     }
 
