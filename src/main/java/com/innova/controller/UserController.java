@@ -12,6 +12,7 @@ import com.innova.exception.ErrorWhileSendingEmailException;
 import com.innova.exception.UnauthorizedException;
 import com.innova.model.ActiveSessions;
 import com.innova.model.Article;
+import com.innova.model.Like;
 import com.innova.model.TokenBlacklist;
 import com.innova.model.User;
 import com.innova.repository.ActiveSessionsRepository;
@@ -20,6 +21,7 @@ import com.innova.repository.UserRepository;
 import com.innova.security.jwt.JwtProvider;
 import com.innova.security.services.UserDetailImpl;
 import com.innova.service.ArticleServiceImpl;
+import com.innova.service.LikeService;
 import com.innova.service.UserServiceImpl;
 import com.innova.util.PasswordUtil;
 
@@ -49,6 +51,9 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    LikeService likeService;
 
     @Autowired
     UserServiceImpl userServiceImpl;
@@ -204,5 +209,12 @@ public class UserController {
         User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         List<Article> articles = articleServiceImpl.getAllArticlesByUserId(user.getId());
         return ResponseEntity.ok().body(articles);
+    }
+
+    @GetMapping("/likes")
+    public ResponseEntity<?> getAllLikesOfUser() {
+        User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        Set<Like> likes = likeService.getLikesOfUser(user);
+        return ResponseEntity.ok().body(likes);
     }
 }
