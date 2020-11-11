@@ -2,6 +2,7 @@ package com.innova.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.validation.Valid;
 
@@ -127,7 +128,13 @@ public class ArticleController {
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Article article = articleService.getById(Integer.parseInt(articleId))
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
-        likeService.removeLike(user, article);
+
+        try {
+            likeService.removeLike(user, article);
+        } catch (NoSuchElementException e) {
+            throw new BadRequestException("You have never liked that", ErrorCodes.NO_SUCH_USER);
+        }
+
         // TODO return success response
         return null;
     }
