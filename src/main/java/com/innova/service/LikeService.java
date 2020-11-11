@@ -12,5 +12,7 @@ public interface LikeService {
 
     public void removeLike(User user, Article article);
 
+    public boolean isUserLiked(User user, Article article);
+
     public Set<Like> getLikesOfUser(User user);
 }
