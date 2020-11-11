@@ -15,6 +15,7 @@ import com.innova.exception.UnauthorizedException;
 import com.innova.model.Article;
 import com.innova.model.User;
 import com.innova.service.ArticleService;
+import com.innova.service.BookmarkService;
 import com.innova.service.UserService;
 import com.innova.service.LikeService;
 
@@ -47,6 +48,9 @@ public class ArticleController {
     @Autowired
     LikeService likeService;
 
+    @Autowired
+    BookmarkService bookmarkService;
+
     // TODO Add pagination
     @GetMapping("/tutorials")
     public ResponseEntity<?> getAllTutorials() {
@@ -55,19 +59,19 @@ public class ArticleController {
     }
 
     // TODO look at multiple url mappings
-    @GetMapping("/tutorials/{articleId}")
-    public ResponseEntity<?> getTutorial(@PathVariable String articleId) {
+
+    @GetMapping(value = { "/tutorials/{articleId}", "/insights/{articleId}", "/engineerings/{articleId}" })
+    public ResponseEntity<?> getArticleDetail(@PathVariable String articleId) {
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        Article tutorialDetail = articleService.getById(Integer.parseInt(articleId))
+        Article articleDetail = articleService.getById(Integer.parseInt(articleId))
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
 
         if (user != null) {
-
-            boolean isUserLiked = likeService.isUserLiked(user, tutorialDetail);
-            boolean isBookmarked = false; // TODO add bookmark service
-            return ResponseEntity.ok().body(new ArticleDetailResponse(tutorialDetail, isUserLiked, isBookmarked));
+            boolean isUserLiked = likeService.isUserLiked(user, articleDetail);
+            boolean isBookmarked = bookmarkService.isUserBookmarked(user, articleDetail);
+            return ResponseEntity.ok().body(new ArticleDetailResponse(articleDetail, isUserLiked, isBookmarked));
         }
-        return ResponseEntity.ok().body(new ArticleDetailResponse(tutorialDetail, false, false));
+        return ResponseEntity.ok().body(new ArticleDetailResponse(articleDetail, false, false));
     }
 
     @GetMapping("/insights")
@@ -76,12 +80,13 @@ public class ArticleController {
         return ResponseEntity.ok().body(insights);
     }
 
-    @GetMapping("/insights/{articleId}")
-    public ResponseEntity<?> getInsight(@PathVariable String articleId) {
-        Article insightDetail = articleService.getById(Integer.parseInt(articleId))
-                .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
-        return ResponseEntity.ok().body(insightDetail);
-    }
+    // @GetMapping("/insights/{articleId}")
+    // public ResponseEntity<?> getInsight(@PathVariable String articleId) {
+    // Article insightDetail = articleService.getById(Integer.parseInt(articleId))
+    // .orElseThrow(() -> new BadRequestException("No such article",
+    // ErrorCodes.NO_SUCH_USER));
+    // return ResponseEntity.ok().body(insightDetail);
+    // }
 
     @GetMapping("/engineerings")
     public ResponseEntity<?> getAllEngineering() {
@@ -89,12 +94,14 @@ public class ArticleController {
         return ResponseEntity.ok().body(engineerings);
     }
 
-    @GetMapping("/engineerings/{articleId}")
-    public ResponseEntity<?> getEngineering(@PathVariable String articleId) {
-        Article engineeringDetail = articleService.getById(Integer.parseInt(articleId))
-                .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
-        return ResponseEntity.ok().body(engineeringDetail);
-    }
+    // @GetMapping("/engineerings/{articleId}")
+    // public ResponseEntity<?> getEngineering(@PathVariable String articleId) {
+    // Article engineeringDetail =
+    // articleService.getById(Integer.parseInt(articleId))
+    // .orElseThrow(() -> new BadRequestException("No such article",
+    // ErrorCodes.NO_SUCH_USER));
+    // return ResponseEntity.ok().body(engineeringDetail);
+    // }
 
     @PostMapping("/")
     public ResponseEntity<?> createNewArticle(@Valid @RequestBody CreateArticleForm createArticleForm) {
@@ -143,7 +150,6 @@ public class ArticleController {
         } catch (NoSuchElementException e) {
             throw new BadRequestException("You have never liked that", ErrorCodes.NO_SUCH_USER);
         }
-
         return null;
     }
 
@@ -152,7 +158,21 @@ public class ArticleController {
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Article article = articleService.getById(Integer.parseInt(articleId))
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
-        // TODO create bookmark table, model, repository, service, serviceImpl
+        bookmarkService.saveBookmark(user, article);
+        return ResponseEntity.ok().body("WOHOOO");
+    }
+
+    @PostMapping("/{articleId}/unbookmark")
+    public ResponseEntity<?> unbookmarkArticle(@PathVariable String articleId) {
+        User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        Article article = articleService.getById(Integer.parseInt(articleId))
+                .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
+
+        try {
+            bookmarkService.removeBookmark(user, article);
+        } catch (NoSuchElementException e) {
+            throw new BadRequestException("You have never bookmarked that", ErrorCodes.NO_SUCH_USER);
+        }
         return null;
     }
 
