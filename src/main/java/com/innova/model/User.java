@@ -72,6 +72,10 @@ public class User {
     @JsonIgnore
     Set<Like> likes;
 
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    Set<Bookmark> bookmarks;
+
     public User() {
 
     }
@@ -190,24 +194,12 @@ public class User {
         this.likes = likes;
     }
 
-    public void addLike(Article article) {
-        Like articleLike = new Like(article, this);
-        likes.add(articleLike);
-        article.getLikes().add(articleLike);
-        System.out.println(articleLike.getArticle().getId());
-        System.out.println(articleLike.getUser().getId());
+    public Set<Bookmark> getBookmarks() {
+        return bookmarks;
     }
 
-    public void removeLike(Article article) {
-        for (Iterator<Like> iterator = likes.iterator(); iterator.hasNext();) {
-            Like like = iterator.next();
-            if (like.getUser().equals(this) && like.getArticle().equals(article)) {
-                iterator.remove();
-                like.getArticle().getLikes().remove(like);
-                like.setArticle(null);
-                like.setUser(null);
-            }
-        }
+    public void setBookmarks(Set<Bookmark> bookmarks) {
+        this.bookmarks = bookmarks;
     }
 
     @Override

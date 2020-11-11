@@ -56,6 +56,10 @@ public class Article {
     @JsonIgnore
     Set<Like> likes;
 
+    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    Set<Bookmark> bookmarks;
+
     @Column(name = "like_count")
     private int likeCount;
 
