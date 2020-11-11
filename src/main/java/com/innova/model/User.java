@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 @Entity
@@ -64,8 +65,12 @@ public class User {
     private Set<ActiveSessions> activeSessions = new HashSet<>();
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference("author")
+    @JsonManagedReference
     private Set<Article> articles = new HashSet<>();;
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    Set<Like> likes;
 
     public User() {
 
@@ -175,6 +180,34 @@ public class User {
 
     public void setAge(String age) {
         this.age = age;
+    }
+
+    public Set<Like> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Set<Like> likes) {
+        this.likes = likes;
+    }
+
+    public void addLike(Article article) {
+        Like articleLike = new Like(article, this);
+        likes.add(articleLike);
+        article.getLikes().add(articleLike);
+        System.out.println(articleLike.getArticle().getId());
+        System.out.println(articleLike.getUser().getId());
+    }
+
+    public void removeLike(Article article) {
+        for (Iterator<Like> iterator = likes.iterator(); iterator.hasNext();) {
+            Like like = iterator.next();
+            if (like.getUser().equals(this) && like.getArticle().equals(article)) {
+                iterator.remove();
+                like.getArticle().getLikes().remove(like);
+                like.setArticle(null);
+                like.setUser(null);
+            }
+        }
     }
 
     @Override
