@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changes/articles_005.sql
   - include:
       file: db/changelog/changes/likes_001.sql
+  - include:
+      file: db/changelog/changes/bookmarks_001.sql
