@@ -1,6 +1,5 @@
 package com.innova;
 
-
 import com.innova.security.jwt.JwtAuthEntryPoint;
 import com.innova.security.jwt.JwtAuthTokenFilter;
 import com.innova.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
@@ -56,48 +55,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder.userDetailsService((userDetailsService)).passwordEncoder(passwordEncoder());
-        //http.csrf().disable();
+        // http.csrf().disable();
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
-                .and()
-                .authorizeRequests()
-                .antMatchers(
-                        "/",
-                        "/error",
-                        "/favicon.ico",
-                        "/**/*.css",
-                        "/**/*.js",
-                        "/**/*.html",
-                        "/**/*.jpg").permitAll()
-                .antMatchers(
-                        "/api/auth/**/",
-                        "/oauth2/**")
-                .permitAll()
-                .antMatchers(
-                    "/api/user/create-new-password/**"
-                )
-                .permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .oauth2Login()
-                .authorizationEndpoint()
-                .baseUri("/oauth2/authorize")
-                .authorizationRequestRepository(cookieAuthorizationRequestRepository())
-                .and()
-                .redirectionEndpoint()
-                .baseUri("/oauth2/callback/*")
-                .and()
-                .userInfoEndpoint()
-                .userService(oAuth2UserService)
-                .and()
-                .successHandler(oAuth2AuthenticationSuccessHandler)
+        http.cors().and().csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and().authorizeRequests()
+                .antMatchers("/", "/error", "/favicon.ico", "/**/*.css", "/**/*.js", "/**/*.html", "/**/*.jpg")
+                .permitAll().antMatchers("/api/auth/**/", "/oauth2/**").permitAll()
+                .antMatchers("/api/user/create-new-password/**").permitAll()
+                .antMatchers("/api/articles/tutorials", "/api/articles/engineerings", "/api/articles/insights",
+                        "/api/articles/tutorials/**", "/api/articles/engineerings/**", "/api/articles/insights/**")
+                .permitAll().anyRequest().authenticated().and().oauth2Login().authorizationEndpoint()
+                .baseUri("/oauth2/authorize").authorizationRequestRepository(cookieAuthorizationRequestRepository())
+                .and().redirectionEndpoint().baseUri("/oauth2/callback/*").and().userInfoEndpoint()
+                .userService(oAuth2UserService).and().successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler);
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
