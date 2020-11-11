@@ -1,9 +1,12 @@
 package com.innova.service;
 
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Set;
 
 import com.innova.model.Article;
 import com.innova.model.Like;
+import com.innova.model.LikeKey;
 import com.innova.model.User;
 import com.innova.repository.LikeRepository;
 
@@ -22,9 +25,9 @@ public class LikeServiceImpl implements LikeService {
         return likeRepository.save(like);
     }
 
-    public void removeLike(User user, Article article) {
-        Like like = new Like(article, user);
-        likeRepository.delete(like);
+    public void removeLike(User user, Article article) throws NoSuchElementException {
+        Optional<Like> like = likeRepository.findById(new LikeKey(user.getId(), article.getId()));
+        likeRepository.delete(like.get());
     }
 
     @Override
