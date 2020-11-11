@@ -8,3 +8,6 @@ create table if not exists  "articles" (
     read_time int NOT NULL,
     author int not null references cloud_users(id)
 );
+
+ALTER TABLE "articles" ADD COLUMN "bookmark_count" int DEFAULT 0;
+ALTER TABLE "articles" DROP COLUMN "bookmark count"

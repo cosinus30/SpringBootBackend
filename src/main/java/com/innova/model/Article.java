@@ -56,6 +56,12 @@ public class Article {
     @JsonIgnore
     Set<Like> likes;
 
+    @Column(name = "like_count")
+    private int likeCount;
+
+    @Column(name = "bookmark_count")
+    private int bookmarkCount;
+
     public Article() {
 
     }
@@ -141,4 +147,19 @@ public class Article {
         this.likes = likes;
     }
 
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public int getBookmarkCount() {
+        return bookmarkCount;
+    }
+
+    public void setBookmarkCount(int bookmarkCount) {
+        this.bookmarkCount = bookmarkCount;
+    }
 }
