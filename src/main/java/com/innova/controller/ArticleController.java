@@ -24,7 +24,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -65,7 +63,7 @@ public class ArticleController {
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Article articleDetail = articleService.getById(Integer.parseInt(articleId))
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
-
+        
         if (user != null) {
             boolean isUserLiked = likeService.isUserLiked(user, articleDetail);
             boolean isBookmarked = bookmarkService.isUserBookmarked(user, articleDetail);
@@ -80,28 +78,11 @@ public class ArticleController {
         return ResponseEntity.ok().body(insights);
     }
 
-    // @GetMapping("/insights/{articleId}")
-    // public ResponseEntity<?> getInsight(@PathVariable String articleId) {
-    // Article insightDetail = articleService.getById(Integer.parseInt(articleId))
-    // .orElseThrow(() -> new BadRequestException("No such article",
-    // ErrorCodes.NO_SUCH_USER));
-    // return ResponseEntity.ok().body(insightDetail);
-    // }
-
     @GetMapping("/engineerings")
     public ResponseEntity<?> getAllEngineering() {
         List<Article> engineerings = articleService.getAllEngineerings();
         return ResponseEntity.ok().body(engineerings);
     }
-
-    // @GetMapping("/engineerings/{articleId}")
-    // public ResponseEntity<?> getEngineering(@PathVariable String articleId) {
-    // Article engineeringDetail =
-    // articleService.getById(Integer.parseInt(articleId))
-    // .orElseThrow(() -> new BadRequestException("No such article",
-    // ErrorCodes.NO_SUCH_USER));
-    // return ResponseEntity.ok().body(engineeringDetail);
-    // }
 
     @PostMapping("/")
     public ResponseEntity<?> createNewArticle(@Valid @RequestBody CreateArticleForm createArticleForm) {
