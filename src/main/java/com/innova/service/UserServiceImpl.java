@@ -26,10 +26,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserWithAuthentication(Authentication authentication) {
-        UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
-        return user;
+        if (authentication.getPrincipal() instanceof UserDetailImpl) {
+            UserDetailImpl userDetails = (UserDetailImpl) authentication.getPrincipal();
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User cannot find"));
+            return user;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -61,6 +65,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User setNewPassword(User user, String password) {
         user.setPassword(passwordEncoder.encode(password));
+        return (userRepository.save(user));
+    }
+
+    @Override
+    public User saveUser(User user) {
         return (userRepository.save(user));
     }
 
