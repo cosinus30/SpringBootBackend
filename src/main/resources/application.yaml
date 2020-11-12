@@ -3,12 +3,12 @@ spring:
     banner-mode: off
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         jdbc:
           lob:
-            non_contextual_creation: false
+            non_contextual_creation: true
         id:
           new_generator_mappings: false
   datasource:

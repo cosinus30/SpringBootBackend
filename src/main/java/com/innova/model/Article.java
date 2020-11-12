@@ -18,14 +18,13 @@ import javax.validation.constraints.Max;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "articles", schema = "public")
 public class Article {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "content")
@@ -60,11 +59,18 @@ public class Article {
     @JsonIgnore
     Set<Bookmark> bookmarks;
 
+    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    Set<View> views;
+
     @Column(name = "like_count")
     private int likeCount;
 
     @Column(name = "bookmark_count")
     private int bookmarkCount;
+
+    @Column(name = "view_count")
+    private int viewCount;
 
     public Article() {
 
@@ -151,6 +157,14 @@ public class Article {
         this.likes = likes;
     }
 
+    public Set<Bookmark> getBookmarks() {
+        return bookmarks;
+    }
+
+    public void setBookmarks(Set<Bookmark> bookmarks) {
+        this.bookmarks = bookmarks;
+    }
+
     public int getLikeCount() {
         return likeCount;
     }
@@ -165,5 +179,13 @@ public class Article {
 
     public void setBookmarkCount(int bookmarkCount) {
         this.bookmarkCount = bookmarkCount;
+    }
+
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
     }
 }

@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 @Entity
@@ -75,6 +74,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     Set<Bookmark> bookmarks;
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    Set<View> views;
 
     public User() {
 
@@ -200,6 +203,14 @@ public class User {
 
     public void setBookmarks(Set<Bookmark> bookmarks) {
         this.bookmarks = bookmarks;
+    }
+
+    public Set<View> getViews() {
+        return views;
+    }
+
+    public void setViews(Set<View> views) {
+        this.views = views;
     }
 
     @Override
