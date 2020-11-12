@@ -20,4 +20,5 @@ public interface ArticleService {
 
     public Article updateArticle(Integer id, String content, String contentType, boolean published, int readTime,
             String heading);
+
 }

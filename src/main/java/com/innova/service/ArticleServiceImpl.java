@@ -57,6 +57,8 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Optional<Article> getById(Integer id) {
         Optional<Article> article = articleRepository.findById(id);
+        article.get().setViewCount(article.get().getViewCount() + 1);
+        articleRepository.save(article.get());
         return article;
     }
 
