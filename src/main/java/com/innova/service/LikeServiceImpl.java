@@ -33,6 +33,8 @@ public class LikeServiceImpl implements LikeService {
 
     public void removeLike(User user, Article article) throws NoSuchElementException {
         Optional<Like> like = likeRepository.findById(new LikeKey(user.getId(), article.getId()));
+        article.setLikeCount(article.getLikeCount() - 1);
+        articleRepository.save(article);
         likeRepository.delete(like.get());
     }
 

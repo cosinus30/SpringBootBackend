@@ -33,6 +33,8 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     public void removeBookmark(User user, Article article) throws NoSuchElementException {
         Optional<Bookmark> bookmark = bookmarkRepository.findById(new BookmarkKey(user.getId(), article.getId()));
+        article.setBookmarkCount(article.getBookmarkCount() - 1);
+        articleRepository.save(article);
         bookmarkRepository.delete(bookmark.get());
     }
 
