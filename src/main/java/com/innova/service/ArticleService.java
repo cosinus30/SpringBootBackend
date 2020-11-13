@@ -5,6 +5,9 @@ import java.util.Optional;
 
 import com.innova.model.Article;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface ArticleService {
     public Article saveArticle(Article article);
 
@@ -20,5 +23,7 @@ public interface ArticleService {
 
     public Article updateArticle(Integer id, String content, String contentType, boolean published, int readTime,
             String heading);
+
+    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable);
 
 }

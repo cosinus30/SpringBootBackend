@@ -30,6 +30,16 @@ spring:
             scope:
               - email
               - profile
+  data:
+    web:
+      pageable:
+        size-parameter: size
+        page-parameter: page
+        default-page-size: 15
+        one-indexed-parameters: false
+        max-page-size: 15
+        prefix: 
+        qualifier-delimeter: _
 
 innova:
   app:

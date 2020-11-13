@@ -17,9 +17,12 @@ import com.innova.model.User;
 import com.innova.service.ArticleService;
 import com.innova.service.BookmarkService;
 import com.innova.service.UserService;
+import com.nimbusds.oauth2.sdk.Response;
 import com.innova.service.LikeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -49,14 +52,13 @@ public class ArticleController {
     @Autowired
     BookmarkService bookmarkService;
 
-    // TODO Add pagination
-    @GetMapping("/tutorials")
-    public ResponseEntity<?> getAllTutorials() {
-        List<Article> tutorials = articleService.getAllTutorials();
-        return ResponseEntity.ok().body(tutorials);
-    }
 
-    // TODO look at multiple url mappings
+    @GetMapping("/{contentType}")
+    public ResponseEntity<?> getTutorialsByType(@PathVariable String contentType, Pageable pageable){
+        Page<Article> publishedArticlesByType = articleService.getArticles(true, contentType, pageable);
+        System.out.println(publishedArticlesByType);
+        return ResponseEntity.ok().body(publishedArticlesByType);
+    }
 
     @GetMapping(value = { "/tutorials/{articleId}", "/insights/{articleId}", "/engineerings/{articleId}" })
     public ResponseEntity<?> getArticleDetail(@PathVariable String articleId) {
@@ -70,18 +72,6 @@ public class ArticleController {
             return ResponseEntity.ok().body(new ArticleDetailResponse(articleDetail, isUserLiked, isBookmarked));
         }
         return ResponseEntity.ok().body(new ArticleDetailResponse(articleDetail, false, false));
-    }
-
-    @GetMapping("/insights")
-    public ResponseEntity<?> getAllInsights() {
-        List<Article> insights = articleService.getAllInsights();
-        return ResponseEntity.ok().body(insights);
-    }
-
-    @GetMapping("/engineerings")
-    public ResponseEntity<?> getAllEngineering() {
-        List<Article> engineerings = articleService.getAllEngineerings();
-        return ResponseEntity.ok().body(engineerings);
     }
 
     @PostMapping("/")

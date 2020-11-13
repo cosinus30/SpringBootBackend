@@ -4,11 +4,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.criteria.CriteriaBuilder;
+
 import com.innova.model.Article;
 import com.innova.model.User;
 import com.innova.repository.ArticleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -75,5 +79,26 @@ public class ArticleServiceImpl implements ArticleService {
             article.setReleaseDate(LocalDateTime.now());
         }
         return articleRepository.save(article);
+    }
+
+    @Override
+    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable) {
+        switch (contentType) {
+            case "tutorials":
+                contentType = "Tutorial";
+                break;
+            case "insights":
+                contentType = "Insight";
+                break;            
+            case "engineerings":
+                contentType = "Engineering";
+                break;
+            default:
+                contentType = "";
+                break;
+        }
+
+        Page<Article> articles = articleRepository.findByPublishedAndContentType(published, contentType, pageable);
+        return articles;
     }
 }
