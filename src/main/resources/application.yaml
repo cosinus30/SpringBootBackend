@@ -35,9 +35,9 @@ spring:
       pageable:
         size-parameter: size
         page-parameter: page
-        default-page-size: 15
+        default-page-size: 12
         one-indexed-parameters: false
-        max-page-size: 15
+        max-page-size: 12
         prefix: 
         qualifier-delimeter: _
 
