@@ -22,24 +22,6 @@ public class ArticleServiceImpl implements ArticleService {
     ArticleRepository articleRepository;
 
     @Override
-    public List<Article> getAllEngineerings() {
-        List<Article> engineering = articleRepository.findArticlesByType("Engineering");
-        return engineering;
-    }
-
-    @Override
-    public List<Article> getAllInsights() {
-        List<Article> insight = articleRepository.findArticlesByType("Insight");
-        return insight;
-    }
-
-    @Override
-    public List<Article> getAllTutorials() {
-        List<Article> tutorials = articleRepository.findArticlesByType("Tutorial");
-        return tutorials;
-    }
-
-    @Override
     public Article saveArticle(Article article) {
         boolean isPublished = article.getPublished();
         if (isPublished) {

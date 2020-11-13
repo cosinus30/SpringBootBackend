@@ -11,12 +11,6 @@ import org.springframework.data.domain.Pageable;
 public interface ArticleService {
     public Article saveArticle(Article article);
 
-    public List<Article> getAllTutorials();
-
-    public List<Article> getAllInsights();
-
-    public List<Article> getAllEngineerings();
-
     public List<Article> getAllArticlesByUserId(Integer userId);
 
     public Optional<Article> getById(Integer id);
