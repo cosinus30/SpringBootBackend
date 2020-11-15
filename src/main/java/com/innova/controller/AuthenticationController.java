@@ -147,10 +147,12 @@ public class AuthenticationController {
                 .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
         roles.add(userRole);
         user.setRoles(roles);
-        userRepository.save(user);
-
+        
+        // ! Cannot send gmail using Heroku, therefore user is not able to verify himself. To overcome this, enable field does not taken to account and set to true for now.
+        user.setEnabled(true);
         try {
             eventPublisher.publishEvent(new OnRegistrationSuccessEvent(user, "/api/auth"));
+            userRepository.save(user);
         } catch (Exception re) {
             throw new ErrorWhileSendingEmailException(re.getMessage());
         }
