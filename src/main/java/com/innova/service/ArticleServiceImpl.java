@@ -51,7 +51,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Article updateArticle(Integer id, String content, String contentType, boolean published, int readTime,
             String heading) {
-        Article article = articleRepository.getOne(id);
+        Article article = articleRepository.findById(id).get();
         article.setContent(content);
         article.setContentType(contentType);
         article.setPublished(published);
@@ -81,6 +81,28 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         Page<Article> articles = articleRepository.findByPublishedAndContentType(published, contentType, pageable);
+        return articles;
+    }
+
+    @Override
+    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable, LocalDateTime start,
+            LocalDateTime end) {
+        switch (contentType) {
+            case "tutorials":
+                contentType = "Tutorial";
+                break;
+            case "insights":
+                contentType = "Insight";
+                break;            
+            case "engineerings":
+                contentType = "Engineering";
+                break;
+            default:
+                contentType = "";
+                break;
+        }
+
+        Page<Article> articles = articleRepository.findByPublishedAndContentTypeAndReleaseDateBetween(published, contentType, pageable, start, end);
         return articles;
     }
 }

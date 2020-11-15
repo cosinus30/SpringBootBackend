@@ -1,5 +1,6 @@
 package com.innova.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -17,7 +18,6 @@ import com.innova.model.User;
 import com.innova.service.ArticleService;
 import com.innova.service.BookmarkService;
 import com.innova.service.UserService;
-import com.nimbusds.oauth2.sdk.Response;
 import com.innova.service.LikeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,11 @@ public class ArticleController {
     public ResponseEntity<?> getTutorialsByType(@PathVariable String contentType, Pageable pageable){
         Page<Article> publishedArticlesByType = articleService.getArticles(true, contentType, pageable);
         System.out.println(publishedArticlesByType);
+        
+        // Page<Article> publishedArticlesByTypeAndDate = articleService.getArticles(true, contentType, pageable, LocalDateTime.now().minusDays(3), LocalDateTime.now());
+
         return ResponseEntity.ok().body(publishedArticlesByType);
+
     }
 
     @GetMapping(value = { "/tutorials/{articleId}", "/insights/{articleId}", "/engineerings/{articleId}" })
@@ -65,7 +69,8 @@ public class ArticleController {
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Article articleDetail = articleService.getById(Integer.parseInt(articleId))
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
-        
+
+
         if (user != null) {
             boolean isUserLiked = likeService.isUserLiked(user, articleDetail);
             boolean isBookmarked = bookmarkService.isUserBookmarked(user, articleDetail);

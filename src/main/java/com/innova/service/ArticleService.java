@@ -1,5 +1,6 @@
 package com.innova.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,5 +20,7 @@ public interface ArticleService {
             String heading);
 
     public Page<Article> getArticles(boolean published, String contentType, Pageable pageable);
+
+    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable, LocalDateTime start, LocalDateTime end);
 
 }
