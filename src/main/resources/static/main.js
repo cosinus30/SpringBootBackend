@@ -368,7 +368,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _interceptors__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./interceptors */ "../../../libs/shared/api/src/lib/config/interceptors/index.ts");
 
 
-const baseUrl = 'https://dev-diary.herokuapp.com';
+const baseUrl = 'http://localhost:8080';
 const defaultConfig = {
   baseURL: `${baseUrl}/api/`
 };
@@ -3862,7 +3862,7 @@ const Login = () => {
     className: "mb-3 mt-3"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(StyledAnchorTag, {
     className: "btn btn-outline-dark alert-dismissible",
-    href: "http://localhost:8080/oauth2/authorize/google?redirect_uri=http://localhost:4200/auth"
+    href: "https://dev-diary.herokuapp.com/oauth2/authorize/google?redirect_uri=https://dev-diary.herokuapp.com/auth"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_fortawesome_react_fontawesome__WEBPACK_IMPORTED_MODULE_8__["FontAwesomeIcon"], {
     icon: _fortawesome_free_brands_svg_icons__WEBPACK_IMPORTED_MODULE_9__["faGoogle"],
     style: {
