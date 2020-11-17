@@ -68,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/articles/tutorials", "/api/articles/engineerings", "/api/articles/insights",
                         "/api/articles/tutorials/**", "/api/articles/engineerings/**", "/api/articles/insights/**")
                 .permitAll().anyRequest().authenticated().and().oauth2Login().authorizationEndpoint()
-                .baseUri("/oauth2/authorize").authorizationRequestRepository(cookieAuthorizationRequestRepository())
+                .baseUri("/api/oauth2/authorize").authorizationRequestRepository(cookieAuthorizationRequestRepository())
                 .and().redirectionEndpoint().baseUri("/oauth2/callback/*").and().userInfoEndpoint()
                 .userService(oAuth2UserService).and().successHandler(oAuth2AuthenticationSuccessHandler)
                 .failureHandler(oAuth2AuthenticationFailureHandler);
