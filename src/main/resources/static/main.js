@@ -3862,7 +3862,7 @@ const Login = () => {
     className: "mb-3 mt-3"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(StyledAnchorTag, {
     className: "btn btn-outline-dark alert-dismissible",
-    href: "https://dev-diary.herokuapp.com/api/oauth2/authorize/google?redirect_uri=https://dev-diary.herokuapp.com/auth"
+    href: "https://dev-diary.herokuapp.com/api/oauth2/authorize/google?redirect_uri=https://dev-diary.herokuapp.com/#/auth"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_fortawesome_react_fontawesome__WEBPACK_IMPORTED_MODULE_8__["FontAwesomeIcon"], {
     icon: _fortawesome_free_brands_svg_icons__WEBPACK_IMPORTED_MODULE_9__["faGoogle"],
     style: {
