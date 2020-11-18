@@ -21,6 +21,6 @@ public interface ArticleService {
 
     public Page<Article> getArticles(boolean published, String contentType, Pageable pageable);
 
-    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable, LocalDateTime start, LocalDateTime end);
+    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable, String span);
 
 }

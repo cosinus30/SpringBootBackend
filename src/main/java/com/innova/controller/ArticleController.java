@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -54,14 +56,17 @@ public class ArticleController {
 
 
     @GetMapping("/{contentType}")
-    public ResponseEntity<?> getTutorialsByType(@PathVariable String contentType, Pageable pageable){
-        Page<Article> publishedArticlesByType = articleService.getArticles(true, contentType, pageable);
-        System.out.println(publishedArticlesByType);
-        
-        // Page<Article> publishedArticlesByTypeAndDate = articleService.getArticles(true, contentType, pageable, LocalDateTime.now().minusDays(3), LocalDateTime.now());
-
-        return ResponseEntity.ok().body(publishedArticlesByType);
-
+    public ResponseEntity<?> getTutorialsByType(@RequestParam Optional<String> time, @PathVariable String contentType, Pageable pageable){
+        if(time.isPresent()){
+            Page<Article> publishedArticlesByTypeAndDate = articleService.getArticles(true, contentType, pageable, time.get());
+            System.out.println("Span is present it seems!");
+            return ResponseEntity.ok().body(publishedArticlesByTypeAndDate);
+        }
+        else{
+            Page<Article> publishedArticlesByType = articleService.getArticles(true, contentType, pageable);
+            System.out.println("Span is present it seems! Naaaaah");
+            return ResponseEntity.ok().body(publishedArticlesByType);
+        }
     }
 
     @GetMapping(value = { "/tutorials/{articleId}", "/insights/{articleId}", "/engineerings/{articleId}" })
