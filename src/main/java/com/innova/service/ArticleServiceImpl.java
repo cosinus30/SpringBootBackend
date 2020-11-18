@@ -85,8 +85,9 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable, LocalDateTime start,
-            LocalDateTime end) {
+    public Page<Article> getArticles(boolean published, String contentType, Pageable pageable, String span) {
+        LocalDateTime start;
+        LocalDateTime end = LocalDateTime.now();
         switch (contentType) {
             case "tutorials":
                 contentType = "Tutorial";
@@ -100,6 +101,20 @@ public class ArticleServiceImpl implements ArticleService {
             default:
                 contentType = "";
                 break;
+        }
+        switch (span) {
+            case "3days":
+                start = LocalDateTime.now().minusDays(3);
+                break;
+            case "week":
+                start = LocalDateTime.now().minusWeeks(1);
+                break;
+            case "month":
+                start = LocalDateTime.now().minusMonths(1);
+                break;
+            default:
+                Page<Article> articles = articleRepository.findByPublishedAndContentType(published, contentType, pageable);
+                return articles;
         }
 
         Page<Article> articles = articleRepository.findByPublishedAndContentTypeAndReleaseDateBetween(published, contentType, pageable, start, end);
