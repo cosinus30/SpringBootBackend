@@ -43,7 +43,7 @@ spring:
 
 server:
   servlet:
-    contextPath: /api/*
+    contextPath: /api
 
 
 innova:
