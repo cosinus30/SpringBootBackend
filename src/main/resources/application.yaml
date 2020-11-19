@@ -41,8 +41,9 @@ spring:
         prefix: 
         qualifier-delimeter: _
 
-management:
-  context-path: /api
+server:
+  servlet:
+    contextPath: /api/*
 
 
 innova:
