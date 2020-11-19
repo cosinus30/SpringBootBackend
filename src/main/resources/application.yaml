@@ -40,12 +40,7 @@ spring:
         max-page-size: 12
         prefix: 
         qualifier-delimeter: _
-
-server:
-  servlet:
-    contextPath: /api
-
-
+        
 innova:
   app:
     jwtSecretForAccessToken: jwtInnovaSecretKey
