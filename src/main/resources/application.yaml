@@ -41,6 +41,10 @@ spring:
         prefix: 
         qualifier-delimeter: _
 
+management:
+  context-path: /api
+
+
 innova:
   app:
     jwtSecretForAccessToken: jwtInnovaSecretKey
