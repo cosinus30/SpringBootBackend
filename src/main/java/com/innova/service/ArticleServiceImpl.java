@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.criteria.CriteriaBuilder;
-
 import com.innova.model.Article;
 import com.innova.model.User;
 import com.innova.repository.ArticleRepository;
