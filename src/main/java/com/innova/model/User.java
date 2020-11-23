@@ -65,7 +65,11 @@ public class User {
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonManagedReference
-    private Set<Article> articles = new HashSet<>();;
+    private Set<Article> articles = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<Comment> comments = new HashSet<>();
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
@@ -211,6 +215,14 @@ public class User {
 
     public void setViews(Set<View> views) {
         this.views = views;
+    }
+
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
     }
 
     @Override

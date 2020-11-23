@@ -1,6 +1,7 @@
 package com.innova.model;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -18,6 +19,7 @@ import javax.validation.constraints.Max;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "articles", schema = "public")
@@ -50,6 +52,10 @@ public class Article {
     @JoinColumn(name = "author", nullable = false)
     @JsonIgnoreProperties(value = { "activeSessions", "articles", "roles" })
     private User author;
+
+    @OneToMany(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<Comment> comments = new HashSet<>();
 
     @OneToMany(mappedBy = "article", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIgnore
@@ -188,4 +194,14 @@ public class Article {
     public void setViewCount(int viewCount) {
         this.viewCount = viewCount;
     }
+
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
+    }
+
+    
 }
