@@ -5,20 +5,25 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.validation.Valid;
 
 import com.innova.constants.ErrorCodes;
+import com.innova.dto.request.CommentForm;
 import com.innova.dto.request.CreateArticleForm;
 import com.innova.dto.response.ArticleDetailResponse;
 import com.innova.dto.response.SuccessResponse;
 import com.innova.exception.BadRequestException;
 import com.innova.exception.UnauthorizedException;
 import com.innova.model.Article;
+import com.innova.model.Comment;
 import com.innova.model.User;
 import com.innova.service.ArticleService;
 import com.innova.service.BookmarkService;
+import com.innova.service.CommentService;
 import com.innova.service.UserService;
+import com.nimbusds.oauth2.sdk.Response;
 import com.innova.service.LikeService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +34,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,6 +59,9 @@ public class ArticleController {
 
     @Autowired
     BookmarkService bookmarkService;
+
+    @Autowired
+    CommentService commentService;
 
 
     @GetMapping("/{contentType}")
@@ -155,6 +164,39 @@ public class ArticleController {
             throw new BadRequestException("You have never bookmarked that", ErrorCodes.NO_SUCH_USER);
         }
         return null;
+    }
+
+    @GetMapping("{articleType}/{articleId}/comment")
+    public ResponseEntity<?> getComments(@PathVariable String articleId){
+        Set<Comment> comments = commentService.getCommentsByArticle(Integer.parseInt(articleId));
+        return ResponseEntity.ok().body(comments);
+    }
+
+    @PostMapping("{articleType}/{articleId}/comment")
+    public ResponseEntity<?> makeComment(@PathVariable String articleId,@Valid @RequestBody CommentForm commentForm){
+        User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        commentService.makeComment(user, Integer.parseInt(articleId), commentForm.getContent());
+        return null;
+    }
+
+    @PutMapping("{articleType}/{articleId}/comment/{commentId}")
+    public ResponseEntity<?> updateComment(@PathVariable String commentId, @Valid @RequestBody CommentForm commentForm){
+        User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        Comment comment = commentService.updateComment(user, Integer.parseInt(commentId), commentForm.getContent());
+        if(comment == null)
+            return ResponseEntity.badRequest().body("Nnaaah");
+        else
+            return ResponseEntity.ok().body(comment);
+    }
+
+    @DeleteMapping("{articleType}/{articleId}/comment/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable String commentId){
+        User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        boolean success = commentService.deleteComment(Integer.parseInt(commentId), user);
+        if(success)
+            return ResponseEntity.ok().body("false");
+        else
+            return ResponseEntity.badRequest().body("True");
     }
 
 }
