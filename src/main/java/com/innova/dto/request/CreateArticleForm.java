@@ -2,7 +2,6 @@ package com.innova.dto.request;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 public class CreateArticleForm {
 
@@ -22,15 +21,27 @@ public class CreateArticleForm {
     @Max(50)
     private String heading;
 
+    private String[] tags;
+
     public CreateArticleForm() {
     }
 
-    public CreateArticleForm(String content, boolean published, String contentType, int readTime, String heading) {
+    public CreateArticleForm(String content, boolean published, String contentType, int readTime, String heading, String[] tags) {
         this.content = content;
         this.published = published;
         this.contentType = contentType;
         this.readTime = readTime;
         this.heading = heading;
+        this.tags = tags;
+    }
+
+
+    public String[] getTags() {
+        return tags;
+    }
+
+    public void setTags(String[] tags) {
+        this.tags = tags;
     }
 
     public String getContent() {

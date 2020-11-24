@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.innova.model.Article;
+import com.innova.model.Tag;
 import com.innova.model.User;
 import com.innova.repository.ArticleRepository;
+import com.innova.repository.TagRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,13 +21,31 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     ArticleRepository articleRepository;
 
+    @Autowired 
+    TagRepository tagRepository;
+
     @Override
-    public Article saveArticle(Article article) {
+    public Article saveArticle(Article article, String [] tags) {
+
         boolean isPublished = article.getPublished();
         if (isPublished) {
             article.setReleaseDate(LocalDateTime.now());
         } else {
             article.setReleaseDate(LocalDateTime.now());
+        }
+
+        for(String tag: tags){
+            Tag currTag = tagRepository.findByTagName(tag);
+            if(currTag == null){
+                Tag newTag = new Tag(tag, "");
+                newTag.setArticleCount(1);
+                tagRepository.save(newTag);
+                article.addTag(newTag);
+            }
+            else{
+                currTag.setArticleCount(currTag.getArticleCount() + 1);
+                article.addTag(currTag);
+            }
         }
         User user = article.getAuthor();
         user.addArticle(article);

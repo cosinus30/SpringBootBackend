@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ArticleService {
-    public Article saveArticle(Article article);
+    public Article saveArticle(Article article, String [] tags);
 
     public List<Article> getAllArticlesByUserId(Integer userId);
 

@@ -1,7 +1,5 @@
 package com.innova.controller;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -18,13 +16,14 @@ import com.innova.exception.BadRequestException;
 import com.innova.exception.UnauthorizedException;
 import com.innova.model.Article;
 import com.innova.model.Comment;
+import com.innova.model.Tag;
 import com.innova.model.User;
 import com.innova.service.ArticleService;
 import com.innova.service.BookmarkService;
 import com.innova.service.CommentService;
 import com.innova.service.UserService;
-import com.nimbusds.oauth2.sdk.Response;
 import com.innova.service.LikeService;
+import com.innova.service.TagService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,6 +62,9 @@ public class ArticleController {
     @Autowired
     CommentService commentService;
 
+    @Autowired
+    TagService tagService;
+
 
     @GetMapping("/{contentType}")
     public ResponseEntity<?> getTutorialsByType(@RequestParam Optional<String> time, @PathVariable String contentType, Pageable pageable){
@@ -99,7 +101,7 @@ public class ArticleController {
         Article article = new Article(createArticleForm.getContent(), createArticleForm.getPublished(),
                 createArticleForm.getContentType(), createArticleForm.getReadTime(), user,
                 createArticleForm.getHeading());
-        articleService.saveArticle(article);
+        articleService.saveArticle(article, createArticleForm.getTags());
         SuccessResponse response = new SuccessResponse(HttpStatus.CREATED, "Article created successfully");
         return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
     }
@@ -199,4 +201,10 @@ public class ArticleController {
             return ResponseEntity.badRequest().body("True");
     }
 
+
+    @GetMapping("/tags")
+    public ResponseEntity<?> getAllTags(){
+        List<Tag> tags = tagService.getAllTags();
+        return ResponseEntity.ok().body(tags);
+    }
 }
