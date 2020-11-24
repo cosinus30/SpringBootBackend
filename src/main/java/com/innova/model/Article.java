@@ -12,6 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -47,6 +49,11 @@ public class Article {
 
     @Column(name = "read_time")
     private int readTime;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @JsonIgnoreProperties(value = {"articles", "articleCount", "tagDetail"})
+    private Set<Tag> tags = new HashSet<>();;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author", nullable = false)
@@ -203,5 +210,15 @@ public class Article {
         this.comments = comments;
     }
 
-    
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
+
+    public void addTag(Tag tag) {
+        tags.add(tag);
+    }
 }
