@@ -70,12 +70,10 @@ public class ArticleController {
     public ResponseEntity<?> getTutorialsByType(@RequestParam Optional<String> time, @PathVariable String contentType, Pageable pageable){
         if(time.isPresent()){
             Page<Article> publishedArticlesByTypeAndDate = articleService.getArticles(true, contentType, pageable, time.get());
-            System.out.println("Span is present it seems!");
             return ResponseEntity.ok().body(publishedArticlesByTypeAndDate);
         }
         else{
             Page<Article> publishedArticlesByType = articleService.getArticles(true, contentType, pageable);
-            System.out.println("Span is present it seems! Naaaaah");
             return ResponseEntity.ok().body(publishedArticlesByType);
         }
     }

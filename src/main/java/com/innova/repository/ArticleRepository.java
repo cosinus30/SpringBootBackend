@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.innova.model.Article;
+import com.innova.model.User;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,8 @@ public interface ArticleRepository extends PagingAndSortingRepository<Article, I
 
     Page<Article> findByPublishedAndContentTypeAndReleaseDateBetween(boolean published,String contentType, Pageable pageable, LocalDateTime releaseDateStart, LocalDateTime releaseDateEnd);
 
-    @Query(value = "SELECT article.* FROM articles article WHERE article.author = :userId", nativeQuery = true)
-    List<Article> findByUserId(@Param("userId") Integer userId);
+    Page<Article> findByAuthorAndContentTypeOrderByReleaseDateDesc(User author, String contentType, Pageable pageable);
+
+    Page<Article> findByAuthorOrderByReleaseDateDesc(User author, Pageable pageable);
 
 }

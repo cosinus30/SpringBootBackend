@@ -27,10 +27,11 @@ import com.innova.util.PasswordUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -205,9 +207,17 @@ public class UserController {
     }
 
     @GetMapping("/articles")
-    public ResponseEntity<?> getAllArticlesOfUser() {
+    public ResponseEntity<?> getAllArticlesOfUser(@RequestParam Optional<String> articleType, Pageable pageable) {
         User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        List<Article> articles = articleServiceImpl.getAllArticlesByUserId(user.getId());
+        Page<Article> articles;
+        if(articleType.isPresent())
+        {
+            articles = articleServiceImpl.getAllArticlesByUserId(user, articleType.get(), pageable);
+        }
+        else{
+            articles = articleServiceImpl.getAllArticlesByUserId(user, "", pageable);
+        }
+
         return ResponseEntity.ok().body(articles);
     }
 
