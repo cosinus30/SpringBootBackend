@@ -158,4 +158,10 @@ public class ArticleServiceImpl implements ArticleService {
         Page<Article> articles = articleRepository.findByPublishedAndContentTypeAndReleaseDateBetween(published, contentType, pageable, start, end);
         return articles;
     }
+
+    @Override
+    public void deleteArticle(Integer articleId, User user) {
+        Optional<Article> article = articleRepository.findById(articleId);
+        articleRepository.delete(article.get());
+    }
 }

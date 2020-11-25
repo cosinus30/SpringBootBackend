@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 public interface ArticleService {
     public Article saveArticle(Article article, String [] tags);
 
+    public void deleteArticle(Integer articleId, User user);
+
     public Page<Article> getAllArticlesByUserId(User user, String contentType, Pageable pageable);
 
     public Optional<Article> getById(Integer id);

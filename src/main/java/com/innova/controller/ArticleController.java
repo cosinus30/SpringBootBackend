@@ -104,9 +104,22 @@ public class ArticleController {
         return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
     }
 
+    @DeleteMapping("/")
+    public ResponseEntity<?> deleteArticle(@RequestParam("articleId") Integer articleId) {
+        User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
+        Article article = articleService.getById(articleId)
+                                .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
+        if (user.getId() != article.getAuthor().getId()) {
+            throw new UnauthorizedException("Only author can update his/her article", ErrorCodes.INVALID_ACCESS_TOKEN);
+        }
+        articleService.deleteArticle(articleId, user);
+        SuccessResponse response = new SuccessResponse(HttpStatus.OK, "Article removed successfully");
+        return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
+    }
+
     @PutMapping("/")
     public ResponseEntity<?> updateArticle(@Valid @RequestBody CreateArticleForm createArticleForm,
-            @Param("articleId") Integer articleId) {
+            @RequestParam("articleId") Integer articleId) {
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Article article = articleService.getById(articleId)
                 .orElseThrow(() -> new BadRequestException("No such article", ErrorCodes.NO_SUCH_USER));
