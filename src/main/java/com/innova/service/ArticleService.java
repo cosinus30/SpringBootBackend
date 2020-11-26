@@ -13,7 +13,7 @@ public interface ArticleService {
 
     public void deleteArticle(Integer articleId, User user);
 
-    public Page<Article> getAllArticlesByUserId(User user, String contentType, Pageable pageable);
+    public Page<Article> getAllArticlesByUserId(User user, String contentType, Pageable pageable, String releaseSit);
 
     public Optional<Article> getById(Integer id);
 

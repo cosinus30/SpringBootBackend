@@ -26,6 +26,10 @@ public interface ArticleRepository extends PagingAndSortingRepository<Article, I
 
     Page<Article> findByAuthorAndContentTypeOrderByReleaseDateDesc(User author, String contentType, Pageable pageable);
 
+    Page<Article> findByAuthorAndContentTypeAndPublishedOrderByReleaseDateDesc(User author, String contentType, boolean published, Pageable pageable);
+
+    Page<Article> findByAuthorAndPublishedOrderByReleaseDateDesc(User author,boolean published, Pageable pageable);
+
     Page<Article> findByAuthorOrderByReleaseDateDesc(User author, Pageable pageable);
 
 }

@@ -207,16 +207,10 @@ public class UserController {
     }
 
     @GetMapping("/articles")
-    public ResponseEntity<?> getAllArticlesOfUser(@RequestParam Optional<String> articleType, Pageable pageable) {
+    public ResponseEntity<?> getAllArticlesOfUser(@RequestParam String articleType,@RequestParam String releaseSit, Pageable pageable) {
         User user = userServiceImpl.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        Page<Article> articles;
-        if(articleType.isPresent())
-        {
-            articles = articleServiceImpl.getAllArticlesByUserId(user, articleType.get(), pageable);
-        }
-        else{
-            articles = articleServiceImpl.getAllArticlesByUserId(user, "", pageable);
-        }
+        Page<Article> articles = articleServiceImpl.getAllArticlesByUserId(user, articleType, pageable, releaseSit);
+
 
         return ResponseEntity.ok().body(articles);
     }

@@ -55,27 +55,31 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Page<Article> getAllArticlesByUserId(User user, String contentType, Pageable pageable) {
-        switch (contentType) {
-            case "tutorials":
-                contentType = "Tutorial";
+    public Page<Article> getAllArticlesByUserId(User user, String contentType, Pageable pageable, String releaseSit) {
+        switch (releaseSit) {
+            case "Released":
+                releaseSit = "published";
                 break;
-            case "insights":
-                contentType = "Insight";
+            case "Draft":
+                releaseSit = "draft";
                 break;            
-            case "engineerings":
-                contentType = "Engineering";
-                break;
             default:
-                contentType = "";
+                releaseSit = "";
                 break;
         }
+
         Page<Article> articlesOfUser;
-        if(contentType.equals("")){
+        if(contentType.equals("All") && releaseSit.equals("")){
             articlesOfUser = articleRepository.findByAuthorOrderByReleaseDateDesc(user, pageable);
         }
-        else{
+        else if(!contentType.equals("All") && releaseSit.equals("") ){
             articlesOfUser = articleRepository.findByAuthorAndContentTypeOrderByReleaseDateDesc(user, contentType, pageable);
+        }
+        else if(contentType.equals("All") && !releaseSit.equals("")){
+            articlesOfUser = articleRepository.findByAuthorAndPublishedOrderByReleaseDateDesc(user, releaseSit.equals("published"), pageable);
+        }   
+        else{
+            articlesOfUser = articleRepository.findByAuthorAndContentTypeAndPublishedOrderByReleaseDateDesc(user, contentType, releaseSit.equals("published"), pageable);
         }
         return articlesOfUser;
     }
