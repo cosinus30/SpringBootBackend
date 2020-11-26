@@ -128,8 +128,9 @@ public class ArticleController {
         if (user.getId() != article.getAuthor().getId()) {
             throw new UnauthorizedException("Only author can update his/her article", ErrorCodes.INVALID_ACCESS_TOKEN);
         }
+        System.out.println("I am hereEEEEEE");
         articleService.updateArticle(articleId, createArticleForm.getContent(), createArticleForm.getContentType(),
-                createArticleForm.getPublished(), createArticleForm.getReadTime(), createArticleForm.getHeading());
+                createArticleForm.getPublished(), createArticleForm.getReadTime(), createArticleForm.getHeading(), createArticleForm.getTags());
         SuccessResponse response = new SuccessResponse(HttpStatus.OK, "Article updated successfully");
         return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
     }

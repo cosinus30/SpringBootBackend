@@ -56,7 +56,7 @@ public class Article {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @JsonIgnoreProperties(value = {"articles", "articleCount", "tagDetail"})
-    private Set<Tag> tags = new HashSet<>();;
+    private Set<Tag> tags = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author", nullable = false)

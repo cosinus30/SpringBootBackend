@@ -4,8 +4,6 @@ import com.innova.model.User;
 import com.innova.security.services.UserDetailImpl;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
-
 public interface UserService {
     public User getUserWithAuthentication(Authentication authentication);
 

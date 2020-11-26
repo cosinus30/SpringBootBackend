@@ -1,6 +1,5 @@
 package com.innova.service;
 
-import java.util.Optional;
 import java.util.Set;
 
 import com.innova.model.Article;

@@ -18,7 +18,7 @@ public interface ArticleService {
     public Optional<Article> getById(Integer id);
 
     public Article updateArticle(Integer id, String content, String contentType, boolean published, int readTime,
-            String heading);
+            String heading, String [] tags);
 
     public Page<Article> getArticles(boolean published, String contentType, Pageable pageable);
 

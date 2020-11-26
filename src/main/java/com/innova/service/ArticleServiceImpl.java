@@ -1,8 +1,10 @@
 package com.innova.service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.innova.model.Article;
 import com.innova.model.Tag;
@@ -88,13 +90,27 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Article updateArticle(Integer id, String content, String contentType, boolean published, int readTime,
-            String heading) {
+            String heading, String [] tags) {
         Article article = articleRepository.findById(id).get();
         article.setContent(content);
         article.setContentType(contentType);
         article.setPublished(published);
         article.setReadTime(readTime);
         article.setHeading(heading);
+        article.setTags(new HashSet<>());
+        for(String tag: tags){
+            Tag currTag = tagRepository.findByTagName(tag);
+            if(currTag == null){
+                Tag newTag = new Tag(tag, "");
+                newTag.setArticleCount(1);
+                tagRepository.save(newTag);
+                article.addTag(newTag);
+            }
+            else{
+                currTag.setArticleCount(currTag.getArticleCount() + 1);
+                article.addTag(currTag);
+            }
+        }
         if (published) {
             article.setReleaseDate(LocalDateTime.now());
         }
