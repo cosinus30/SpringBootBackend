@@ -9,5 +9,6 @@ create table if not exists  "articles" (
     author int not null references cloud_users(id),
     bookmark_count int DEFAULT 0,
     like_count int DEFAULT 0,
-    view_count int DEFAULT 0
+    view_count int DEFAULT 0,
+    image_url text
 );

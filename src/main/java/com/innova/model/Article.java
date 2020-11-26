@@ -50,6 +50,9 @@ public class Article {
     @Column(name = "read_time")
     private int readTime;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @JsonIgnoreProperties(value = {"articles", "articleCount", "tagDetail"})
@@ -89,13 +92,14 @@ public class Article {
 
     }
 
-    public Article(String content, boolean published, String contentType, int readTime, User author, String heading) {
+    public Article(String content, boolean published, String contentType, int readTime, User author, String heading, String imageUrl) {
         this.content = content;
         this.published = published;
         this.contentType = contentType;
         this.readTime = readTime;
         this.author = author;
         this.heading = heading;
+        this.imageUrl = imageUrl;
     }
 
     public Integer getId() {
@@ -152,6 +156,14 @@ public class Article {
 
     public void setReadTime(int readTime) {
         this.readTime = readTime;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public User getAuthor() {

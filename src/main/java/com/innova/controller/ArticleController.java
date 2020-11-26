@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -98,7 +99,8 @@ public class ArticleController {
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
         Article article = new Article(createArticleForm.getContent(), createArticleForm.getPublished(),
                 createArticleForm.getContentType(), createArticleForm.getReadTime(), user,
-                createArticleForm.getHeading());
+                createArticleForm.getHeading(), createArticleForm.getImageUrl());
+        System.out.println(createArticleForm.getImageUrl());
         articleService.saveArticle(article, createArticleForm.getTags());
         SuccessResponse response = new SuccessResponse(HttpStatus.CREATED, "Article created successfully");
         return new ResponseEntity<>(response, new HttpHeaders(), response.getStatus());
@@ -188,8 +190,8 @@ public class ArticleController {
     @PostMapping("{articleType}/{articleId}/comment")
     public ResponseEntity<?> makeComment(@PathVariable String articleId,@Valid @RequestBody CommentForm commentForm){
         User user = userService.getUserWithAuthentication(SecurityContextHolder.getContext().getAuthentication());
-        commentService.makeComment(user, Integer.parseInt(articleId), commentForm.getContent());
-        return null;
+        Comment comment = commentService.makeComment(user, Integer.parseInt(articleId), commentForm.getContent());
+        return ResponseEntity.ok().body(comment);
     }
 
     @PutMapping("{articleType}/{articleId}/comment/{commentId}")

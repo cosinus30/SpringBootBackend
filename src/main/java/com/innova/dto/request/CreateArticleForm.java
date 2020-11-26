@@ -23,18 +23,28 @@ public class CreateArticleForm {
 
     private String[] tags;
 
+    private String imageUrl;
+
     public CreateArticleForm() {
     }
 
-    public CreateArticleForm(String content, boolean published, String contentType, int readTime, String heading, String[] tags) {
+    public CreateArticleForm(String content, boolean published, String contentType, int readTime, String heading, String[] tags, String imageUrl) {
         this.content = content;
         this.published = published;
         this.contentType = contentType;
         this.readTime = readTime;
         this.heading = heading;
         this.tags = tags;
+        this.imageUrl = imageUrl;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     public String[] getTags() {
         return tags;
