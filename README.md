@@ -4,7 +4,7 @@
 
 You can access the demo app from [here](https://innova-staj.web.app/)
 
-##Techs used
+## Techs used
 - Spring Boot
 - Thymeleaf
 - JPA
